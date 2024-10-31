@@ -1,0 +1,3 @@
+[submodule "test/csp2"]
+	path = test/csp2
+	url = https://github.com/CFSAN-Biostatistics/CSP2_TestData.git

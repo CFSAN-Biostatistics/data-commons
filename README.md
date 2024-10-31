@@ -8,12 +8,12 @@ A common resource for testing workflows against inputs and known outputs. Genera
 
 A high-entropy file compressed in several formats:
 
-https://raw.githubusercontent.com/CFSAN-Biostatistics/data-commons/test/compression/example.raw
-https://raw.githubusercontent.com/CFSAN-Biostatistics/data-commons/test/compression/example.gz
-https://raw.githubusercontent.com/CFSAN-Biostatistics/data-commons/test/compression/example.tar.gz
-https://raw.githubusercontent.com/CFSAN-Biostatistics/data-commons/test/compression/example.1.zst # ZSTD compression level 1
-https://raw.githubusercontent.com/CFSAN-Biostatistics/data-commons/test/compression/example.8.zst # compression level 8
-https://raw.githubusercontent.com/CFSAN-Biostatistics/data-commons/test/compression/example.15.zst # compression level 15
+test/compression/example.raw
+test/compression/example.gz
+test/compression/example.tar.gz
+test/compression/example.1.zst # ZSTD compression level 1
+test/compression/example.8.zst # compression level 8
+test/compression/example.15.zst # compression level 15
 
 ### test/csp2
 

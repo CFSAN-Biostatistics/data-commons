@@ -1,0 +1,2 @@
+Sample name	Output directory	Input files	O antigen prediction	H1 antigen prediction(fliC)	H2 antigen prediction(fljB)	Predicted identification	Predicted antigenic profile	Predicted serotype	Note
+reads.fa_1.fastq	/data/SeqSero_result_11_27_2024_09_21_303248410	reads.fa_1.fastq	7	b	1,5	Salmonella enterica subspecies enterica (subspecies I)	7:b:1,5	Edinburg	

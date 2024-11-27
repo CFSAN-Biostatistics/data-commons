@@ -1,0 +1,49 @@
+O_scores:
+O-7_wzy__1080	68.3111954459203
+
+H_scores:
+fljB_1,2_Salmonella.enterica_Stanley_AY353267_1__1521	41.33779264214047
+fljB_1,2_Saintpaulstr_AYDS01000021_1__1511	43.36700336700336
+fljB_1,2_Heidelbergstr_AMMX01000009_1__1511	43.16498316498317
+fljB_1,2_Salmonella.enterica_Muenchen_AY353269_1__1521	40.802675585284284
+fljB_1,5_Infantisstr_ASRF01000034_1__1511	48.754208754208754
+fljB_1,7_Salmonella.enterica_Bredeney_AY353296_1__1521	48.36120401337793
+fljB_1,2_Typhimuriumstr_AHVA01000007_1__1511	41.54882154882154
+fljB_1,5_Salmonella.enterica_Thompson_AY353285_1__1521	41.60535117056856
+fljB_1,2_Salmonella.enterica_Typhimurium_AY353264_1__1521	43.07692307692308
+fljB_1,7_Pomonastr_AHIA01000072_1__1511	47.54208754208754
+fljB_1,5_Muensterstr_AOYX01000059_1__1511	44.78114478114478
+fliC_b_Salmonella.enterica_Paratyphi.B_AY353358_b,d,j__1488	53.55677154582763
+fljB_e,n,z15_Braenderupstr_AOZM01000055_e__1496	40.476190476190474
+fljB_1,5_Bareillystr_AOZP01000315_1__1511	45.925925925925924
+fljB_1,5_Manhattanstr_CBKW010000016_1__1511	45.925925925925924
+fljB_1,5_Idikan_SRR1272896__1511	44.64646464646464
+fljB_1,2_Saintpaulstr_AOXF01000050_1__1511	47.003367003367
+fljB_1,2_Newportstr_AJMO01000050_1__1511	43.36700336700336
+fliC_y_Bareillystr_ALPN01000010_other.y__1509	41.40256237356709
+fljB_1,2_Salmonella.enterica_Heidelberg_AY353265_1__1521	40.33444816053512
+fljB_1,5_Bareilly_CFSAN000189__1511	41.68350168350168
+fliC_b_Salmonella.enterica_Urbana_No-upload-yet_b,d,j__1488	67.30506155950752
+fljB_1,5_Salmonella.enterica_Bovismorbificans_AY353283_1__1521	61.1371237458194
+fljB_e,n,z15_Salmonella.enterica_Brandenburg_AY353323_e__1506	44.45945945945946
+fliC_b_Salmonella.enterica_Niederoderwitz_AY353360_b,d,j__1488	52.872777017783854
+fljB_1,5_Panamastr_AOYJ01000008_1__1511	58.85521885521886
+fljB_e,n,z15_Salmonella.enterica_Uno_AY353325_e__1506	41.21621621621622
+fliC_b_Salmonella.enterica_I.6,7:b:z33_AY353361_b,d,j__1488	46.306429548563614
+fljB_1,5_Infantisstr_AFYI01000002_1__1511	54.74747474747475
+fliC_b_ParatyphiBstr_AOXH01000168_b,d,j__1476	54.41379310344827
+fljB_e,n,x_Salmonella.enterica_Bessi_AY353317_e__1506	41.68918918918919
+fljB_e,n,x_Salmonella.enterica_Gatuni_AY353322_e__1506	40.06756756756757
+fljB_e,n,z15_Salmonella.enterica_Sanktgeorg_AY353326_e__1506	52.77027027027027
+fliC_y_Pomonastr_AHIA01000046_other.y__1509	40.6608226567768
+fliC_y_Hartfordstr_ALPO01000014_other.y__1509	40.99797707349966
+fljB_1,5_from-Infantis-micro-assembly_SRR1106258_1__1521	46.42140468227425
+fljB_1,5_Javiana_SAMN02902435_1__1511	49.696969696969695
+fljB_1,5_Muenster_DTU-unknown(tail&head may be fliC due to extract by mapping)_1__1521	45.953177257525084
+fljB_1,7_Salmonella.enterica_Nola_AY353298_1__1521	41.73913043478261
+
+Special_scores:
+gntR-family-regulatory-protein_dt-negative__291	47.54716981132076
+gntR-family-regulatory-protein_dt-positive__291	47.54716981132076
+allmers	10.661320094201516
+uniqmers_I	85.0

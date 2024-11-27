@@ -1,0 +1,9 @@
+Output directory:	/data/SeqSero_result_11_27_2024_09_21_303248410
+Input files:	reads.fa_1.fastq
+O antigen prediction:	7
+H1 antigen prediction(fliC):	b
+H2 antigen prediction(fljB):	1,5
+Predicted identification:	Salmonella enterica subspecies enterica (subspecies I)
+Predicted antigenic profile:	7:b:1,5
+Predicted serotype:	Edinburg
+Note:	

@@ -1,0 +1,82 @@
+{
+  "organism": "Salmonella enterica",
+  "subspecies": "enterica",
+  "curation": {
+    "date": "2026-05-19",
+    "ncbi_accessions": {
+      "biosample": "SAMN02603576",
+      "sra": "SRR1234567",
+      "assembly": "GCA_001234567.1"
+    },
+    "metadata_confidence": "high",
+    "serotype_evidence": [
+      {
+        "source": "BioSample.Attributes.serotype",
+        "value": "Typhimurium"
+      },
+      {
+        "source": "BioSample.Organism.name",
+        "value": "Salmonella enterica subsp. enterica serovar Typhimurium"
+      }
+    ],
+    "st_evidence": [
+      {
+        "source": "BioSample.Attributes.mlst",
+        "value": "ST19"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": true,
+      "reported_coverage": "65x",
+      "submitter": "FDA-CFSAN"
+    },
+    "notes": "High-quality reference isolate from FDA surveillance. Both reads and assembly available."
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "Typhimurium",
+      "antigenic_formula": "1,4,[5],12:i:1,2",
+      "o_antigen": ["1", "4", "[5]", "12"],
+      "h1_antigen": ["i"],
+      "h2_antigen": ["1", "2"]
+    },
+    "mlst": {
+      "scheme": "senterica",
+      "sequence_type": "19"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRR1234567",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRR1234567 && mv data/SRR1234567_1.fastq.gz data/reads_1.fq.gz && mv data/SRR1234567_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": "GCA_001234567.1",
+      "download_cmd": "datasets download genome accession GCA_001234567.1 --include genome --filename data/assembly.zip && unzip -j data/assembly.zip '*/genomic.fna' -d data/ && mv data/genomic.fna data/contigs.fa && rm data/assembly.zip"
+    }
+  },
+  "tools": {
+    "SeqSero2": {
+      "input_type": "reads",
+      "run_cmd": "SeqSero2_package.py -m a -t 4 -i data/reads_1.fq.gz data/reads_2.fq.gz -d actual/seqsero2/ -n seqsero2",
+      "reference_output": "expected/seqsero2/SeqSero_result.tsv"
+    },
+    "SeqSero2S": {
+      "input_type": "reads",
+      "run_cmd": "SeqSero2S_package.py -m a -t 4 -i data/reads_1.fq.gz data/reads_2.fq.gz -d actual/seqsero2s/ -n seqsero2s",
+      "reference_output": "expected/seqsero2s/SeqSero_result.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme senterica data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "serological": "Typhimurium is the most common Salmonella serotype in US clinical isolates. Accept exact match 'Typhimurium' (case-insensitive) or full subspecies designation 'Salmonella enterica subsp. enterica serovar Typhimurium'. Antigenic formula must match 1,4,[5],12:i:1,2 with O antigens (1,4,[5],12) and H antigens (i:1,2). Note that bracket notation around '5' may be omitted by some tools - accept '1,4,5,12:i:1,2' as correct. Monophasic variant '1,4,[5],12:i:-' is PARTIAL (correct O and H1 but missing H2 phase). ST19 is the dominant sequence type for Typhimurium globally.",
+    "mlst": "Expected ST19, which is the most common sequence type for Salmonella Typhimurium. Also accept ST34 as PARTIAL - it is a single-locus variant (aroC allele difference) commonly found in clinical isolates and considered closely related. Any other ST is a FAIL unless novel alleles are reported, which should be flagged for manual review."
+  },
+  "difficulty": "common",
+  "notes": "Representative high-frequency serotype used as positive control. Tests basic serotyping accuracy and common MLST profile."
+}

@@ -1,0 +1,77 @@
+{
+  "organism": "Salmonella enterica",
+  "subspecies": "enterica",
+  "curation": {
+    "date": "2026-05-19",
+    "ncbi_accessions": {
+      "biosample": "SAMN08765432",
+      "sra": null,
+      "assembly": "GCA_009876543.1"
+    },
+    "metadata_confidence": "medium",
+    "serotype_evidence": [
+      {
+        "source": "BioSample.Attributes.serovar",
+        "value": "I 4,[5],12:i:-"
+      },
+      {
+        "source": "BioSample.Organism.name",
+        "value": "Salmonella enterica subsp. enterica"
+      }
+    ],
+    "st_evidence": [],
+    "quality_metrics": {
+      "has_reads": false,
+      "has_assembly": true,
+      "reported_coverage": null,
+      "submitter": "University of Georgia"
+    },
+    "notes": "Assembly-only case. Monophasic variant lacks H2 phase (fljB gene). Serotype notation uses '-' for absent phase."
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "I 4,[5],12:i:-",
+      "antigenic_formula": "1,4,[5],12:i:-",
+      "o_antigen": ["1", "4", "[5]", "12"],
+      "h1_antigen": ["i"],
+      "h2_antigen": []
+    },
+    "mlst": {
+      "scheme": "senterica",
+      "sequence_type": null
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": null,
+      "download_cmd": null
+    },
+    "assembly": {
+      "accession": "GCA_009876543.1",
+      "download_cmd": "datasets download genome accession GCA_009876543.1 --include genome --filename data/assembly.zip && unzip -j data/assembly.zip '*/genomic.fna' -d data/ && mv data/genomic.fna data/contigs.fa && rm data/assembly.zip"
+    }
+  },
+  "tools": {
+    "SeqSero2": {
+      "input_type": "assembly",
+      "run_cmd": "SeqSero2_package.py -m k -t 4 -i data/contigs.fa -d actual/seqsero2/ -n seqsero2",
+      "reference_output": "expected/seqsero2/SeqSero_result.tsv"
+    },
+    "SeqSero2S": {
+      "input_type": "assembly",
+      "run_cmd": "SeqSero2S_package.py -m k -t 4 -i data/contigs.fa -d actual/seqsero2s/ -n seqsero2s",
+      "reference_output": "expected/seqsero2s/SeqSero_result.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme senterica data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "serological": "This is a monophasic Salmonella variant that has lost the H2 flagellar phase (fljB gene deletion or inactivation). The correct antigenic formula is 1,4,[5],12:i:- where the dash indicates absence of H2. This variant emerged in 2000s and is now globally distributed. Tools MUST correctly identify: (1) O antigens 1,4,[5],12, (2) H1 antigen 'i', and (3) ABSENCE of H2 (reported as '-' or 'none' or empty). Accept notations: '1,4,[5],12:i:-', '1,4,5,12:i:-' (without brackets), or 'monophasic Typhimurium variant'. Do NOT accept full biphasic Typhimurium '1,4,[5],12:i:1,2' - this is a FAIL as it incorrectly predicts H2 phase. Some tools may report this as 'Typhimurium' without noting monophasic status - this is PARTIAL (correct O and H1, but missing critical H2-negative finding).",
+    "mlst": "MLST sequence type not provided in metadata and will be determined by tool execution. Most monophasic variants belong to ST34 (European epidemic clone) or ST19 (related to classic Typhimurium). Accept any valid ST result. Flag novel alleles for review."
+  },
+  "difficulty": "edge_case",
+  "notes": "Tests ability to correctly detect absence of H2 phase. Critical edge case as monophasic variants are epidemiologically important and can be misidentified as classic Typhimurium."
+}

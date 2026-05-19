@@ -1,0 +1,12 @@
+# Downloaded sequence data (fetch on-demand)
+*/data/
+
+# Fresh tool execution outputs (compare against expected/)
+*/actual/
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+.DS_Store

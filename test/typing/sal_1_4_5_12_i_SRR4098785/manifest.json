@@ -1,0 +1,77 @@
+{
+  "organism": "Salmonella enterica",
+  "curation": {
+    "date": "2026-05-21",
+    "ncbi_accessions": {
+      "biosample": null,
+      "sra": "SRR4098785",
+      "assembly": null
+    },
+    "metadata_confidence": "high",
+    "serotype_evidence": [
+      {
+        "source": "ValidationPanel.Serotype",
+        "value": "I 1,4,[5],12:i:-"
+      }
+    ],
+    "st_evidence": [
+      {
+        "source": "ValidationPanel.ST",
+        "value": "-"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": false,
+      "reported_coverage": null,
+      "submitter": "FDA-CFSAN Validation Panel"
+    },
+    "notes": "Imported from validation panel. Original serotype: I 1,4,[5],12:i:-. "
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "I 1,4,[5],12:i:-",
+      "antigenic_formula": "4:i:-",
+      "o_antigen": [
+        "4"
+      ],
+      "h1_antigen": [
+        "i"
+      ],
+      "h2_antigen": []
+    },
+    "mlst": {
+      "scheme": "senterica",
+      "sequence_type": "-"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRR4098785",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRR4098785 && mv data/SRR4098785_1.fastq.gz data/reads_1.fq.gz && mv data/SRR4098785_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": null,
+      "download_cmd": null
+    }
+  },
+  "tools": {
+    "SeqSero2": {
+      "input_type": "reads",
+      "run_cmd": "SeqSero2_package.py -m a -t 4 -i data/reads_1.fq.gz data/reads_2.fq.gz -d actual/seqsero2/ -n seqsero2",
+      "reference_output": "expected/seqsero2/SeqSero_result.tsv"
+    },
+    "SeqSero2S": {
+      "input_type": "reads",
+      "run_cmd": "SeqSero2S_package.py -m a -t 4 -i data/reads_1.fq.gz data/reads_2.fq.gz -d actual/seqsero2s/ -n seqsero2s",
+      "reference_output": "expected/seqsero2s/SeqSero_result.tsv"
+    }
+  },
+  "validation_instructions": {
+    "serological": "Expected serotype: I 1,4,[5],12:i:-. Antigenic formula should match 4:i:-. This is a monophasic variant (H2-negative). Tool must correctly identify absence of H2 phase (reported as '-' or empty). Do NOT accept biphasic predictions with H2 antigens - this is a FAIL.",
+    "mlst": "MLST sequence type not provided in validation panel. Accept any valid ST result from tool. Flag novel alleles for review."
+  },
+  "difficulty": "common",
+  "notes": "Part of FDA-CFSAN validation panel.",
+  "subspecies": "enterica"
+}

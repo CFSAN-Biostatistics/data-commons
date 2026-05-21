@@ -1,0 +1,83 @@
+{
+  "organism": "Salmonella enterica",
+  "curation": {
+    "date": "2026-05-21",
+    "ncbi_accessions": {
+      "biosample": null,
+      "sra": "SRR1248786",
+      "assembly": null
+    },
+    "metadata_confidence": "high",
+    "serotype_evidence": [
+      {
+        "source": "ValidationPanel.Serotype",
+        "value": "Enteritidis"
+      }
+    ],
+    "st_evidence": [
+      {
+        "source": "ValidationPanel.ST",
+        "value": "11"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": false,
+      "reported_coverage": null,
+      "submitter": "FDA-CFSAN Validation Panel"
+    },
+    "notes": "Imported from validation panel. Original serotype: Enteritidis. Panel notes: Detected Sdf I that is characteristic of commonly circulating strains of serotype Enteritidis."
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "Enteritidis",
+      "antigenic_formula": "9:g,m:-",
+      "o_antigen": [
+        "9"
+      ],
+      "h1_antigen": [
+        "g",
+        "m"
+      ],
+      "h2_antigen": []
+    },
+    "mlst": {
+      "scheme": "senterica",
+      "sequence_type": "11"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRR1248786",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRR1248786 && mv data/SRR1248786_1.fastq.gz data/reads_1.fq.gz && mv data/SRR1248786_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": null,
+      "download_cmd": null
+    }
+  },
+  "tools": {
+    "SeqSero2": {
+      "input_type": "reads",
+      "run_cmd": "SeqSero2_package.py -m a -t 4 -i data/reads_1.fq.gz data/reads_2.fq.gz -d actual/seqsero2/ -n seqsero2",
+      "reference_output": "expected/seqsero2/SeqSero_result.tsv"
+    },
+    "SeqSero2S": {
+      "input_type": "reads",
+      "run_cmd": "SeqSero2S_package.py -m a -t 4 -i data/reads_1.fq.gz data/reads_2.fq.gz -d actual/seqsero2s/ -n seqsero2s",
+      "reference_output": "expected/seqsero2s/SeqSero_result.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme senterica data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "serological": "Expected serotype: Enteritidis. Antigenic formula should match 9:g,m:-. Note: Sdf marker characteristic of Enteritidis may be referenced by tool.",
+    "mlst": "Expected ST11. Accept exact match. ST11 is dominant for Enteritidis. Flag novel alleles for manual review."
+  },
+  "difficulty": "common",
+  "notes": "Part of FDA-CFSAN validation panel. Detected Sdf I that is characteristic of commonly circulating strains of serotype Enteritidis.",
+  "subspecies": "enterica"
+}

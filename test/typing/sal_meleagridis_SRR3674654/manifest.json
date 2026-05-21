@@ -1,0 +1,87 @@
+{
+  "organism": "Salmonella enterica",
+  "curation": {
+    "date": "2026-05-21",
+    "ncbi_accessions": {
+      "biosample": null,
+      "sra": "SRR3674654",
+      "assembly": null
+    },
+    "metadata_confidence": "high",
+    "serotype_evidence": [
+      {
+        "source": "ValidationPanel.Serotype",
+        "value": "Meleagridis"
+      }
+    ],
+    "st_evidence": [
+      {
+        "source": "ValidationPanel.ST",
+        "value": "463"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": false,
+      "reported_coverage": null,
+      "submitter": "FDA-CFSAN Validation Panel"
+    },
+    "notes": "Imported from validation panel. Original serotype: Meleagridis. "
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "Meleagridis",
+      "antigenic_formula": "3,10:e,h:l,w",
+      "o_antigen": [
+        "3",
+        "10"
+      ],
+      "h1_antigen": [
+        "e",
+        "h"
+      ],
+      "h2_antigen": [
+        "l",
+        "w"
+      ]
+    },
+    "mlst": {
+      "scheme": "senterica",
+      "sequence_type": "463"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRR3674654",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRR3674654 && mv data/SRR3674654_1.fastq.gz data/reads_1.fq.gz && mv data/SRR3674654_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": null,
+      "download_cmd": null
+    }
+  },
+  "tools": {
+    "SeqSero2": {
+      "input_type": "reads",
+      "run_cmd": "SeqSero2_package.py -m a -t 4 -i data/reads_1.fq.gz data/reads_2.fq.gz -d actual/seqsero2/ -n seqsero2",
+      "reference_output": "expected/seqsero2/SeqSero_result.tsv"
+    },
+    "SeqSero2S": {
+      "input_type": "reads",
+      "run_cmd": "SeqSero2S_package.py -m a -t 4 -i data/reads_1.fq.gz data/reads_2.fq.gz -d actual/seqsero2s/ -n seqsero2s",
+      "reference_output": "expected/seqsero2s/SeqSero_result.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme senterica data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "serological": "Expected serotype: Meleagridis. Antigenic formula should match 3,10:e,h:l,w.",
+    "mlst": "Expected ST463. Accept exact match. Flag novel alleles for manual review."
+  },
+  "difficulty": "common",
+  "notes": "Part of FDA-CFSAN validation panel.",
+  "subspecies": "enterica"
+}

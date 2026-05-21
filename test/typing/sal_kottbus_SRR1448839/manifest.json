@@ -1,0 +1,78 @@
+{
+  "organism": "Salmonella enterica",
+  "curation": {
+    "date": "2026-05-21",
+    "ncbi_accessions": {
+      "biosample": null,
+      "sra": "SRR1448839",
+      "assembly": null
+    },
+    "metadata_confidence": "high",
+    "serotype_evidence": [
+      {
+        "source": "ValidationPanel.Serotype",
+        "value": "Kottbus"
+      }
+    ],
+    "st_evidence": [
+      {
+        "source": "ValidationPanel.ST",
+        "value": "212"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": false,
+      "reported_coverage": null,
+      "submitter": "FDA-CFSAN Validation Panel"
+    },
+    "notes": "Imported from validation panel. Original serotype: Kottbus. Panel notes: No serotype antigens were detected. This is an atypical result that should be further investigated."
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "Kottbus",
+      "antigenic_formula": "-:-:-",
+      "o_antigen": [],
+      "h1_antigen": [],
+      "h2_antigen": []
+    },
+    "mlst": {
+      "scheme": "senterica",
+      "sequence_type": "212"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRR1448839",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRR1448839 && mv data/SRR1448839_1.fastq.gz data/reads_1.fq.gz && mv data/SRR1448839_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": null,
+      "download_cmd": null
+    }
+  },
+  "tools": {
+    "SeqSero2": {
+      "input_type": "reads",
+      "run_cmd": "SeqSero2_package.py -m a -t 4 -i data/reads_1.fq.gz data/reads_2.fq.gz -d actual/seqsero2/ -n seqsero2",
+      "reference_output": "expected/seqsero2/SeqSero_result.tsv"
+    },
+    "SeqSero2S": {
+      "input_type": "reads",
+      "run_cmd": "SeqSero2S_package.py -m a -t 4 -i data/reads_1.fq.gz data/reads_2.fq.gz -d actual/seqsero2s/ -n seqsero2s",
+      "reference_output": "expected/seqsero2s/SeqSero_result.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme senterica data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "serological": "Expected serotype: Kottbus. Antigenic formula should match -:-:-. EDGE CASE: Rough strain with no detectable antigens. Tool may fail or report atypical result - document behavior.",
+    "mlst": "Expected ST212. Accept exact match. Flag novel alleles for manual review."
+  },
+  "difficulty": "edge_case",
+  "notes": "Part of FDA-CFSAN validation panel. No serotype antigens were detected. This is an atypical result that should be further investigated.",
+  "subspecies": "enterica"
+}

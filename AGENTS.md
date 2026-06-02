@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENTS.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -9,7 +9,8 @@ Test data library for bioinformatics tool validation. Provides known input/outpu
 **Design principles:**
 - Small & portable - download via GitHub raw links during testing
 - No large source data committed (use references to public databases)
-- Known ground truth for each test case
+- Known ground truth for typing/validation test cases (`test/typing/`)
+- No expected outcome for adversarial challenge cases (`test/challenges/`) — they encode the pathological condition, not the expected tool behavior
 
 ## Repository Structure
 
@@ -160,15 +161,21 @@ Discovery script uses modular Python libraries in `scripts/lib/`:
 A **stimulus library** — datasets with characteristics that target known failure modes in major bioinformatics tool categories. Distinct from `test/typing/` in a fundamental way: challenges encode the *pathological condition*, not expected tool behavior. There is no ground truth and no pass/fail assertion. The purpose is to provide adversarial inputs that expose tool assumptions.
 
 **Key design decisions:**
-- Phenomenon-first organization: challenges are grouped by biological/technical phenomenon (`contamination/`, `wrong_organism/`, `extreme_gc/`, etc.), not by tool
+- Phenomenon-first organization: challenges are grouped by biological/technical phenomenon (`contamination/`, `wrong_organism/`, `amr_detection/`, etc.), not by tool
 - Each challenge has a `manifest.json` with sample roles, mechanism description, and download instructions — no bulk data committed
 - Multi-sample challenges use explicit roles: `reference`, `ingroup`, `outlier`, `contaminant`, `subject`
+- Optional `known_behaviors` field documents observed tool behavior — not a pass/fail assertion, just reference information
 - Layout templates (`tool_layouts/`) render symlink trees so downloaded data appears in the directory structure each tool family expects
-- `acquire.py` handles download; `layout.py --challenge X --tool Y --out /path` renders a working layout
+- `acquire.py` handles download and recipe-based synthetic data generation; `layout.py --challenge X --tool Y --out /path` renders a working layout
 
-**Priority for new challenges:** in-silico typing & SNP pipelines → assembly → alignment
+**Current coverage:** 22 challenges across 10 phenomenon categories:
+`amr_detection` (5) · `contamination` (3) · `degenerate_input` (3) · `extreme_gc` (1) · `file_format` (1) · `high_recombination` (1) · `low_coverage` (2) · `platform_mismatch` (1) · `repetitive_genome` (3) · `wrong_organism` (1) · `wrong_reference` (1)
 
-See `test/challenges/README.md` for full documentation, `MANIFEST_SCHEMA.md` for the manifest field reference, and `FAILURE_MODES.md` for the research catalog of known failure modes across all tool categories.
+**Tool families supported** (9 layout templates in `tool_layouts/`): `bwa-family`, `snippy-family`, `cfsan-snp-pipeline`, `spades-family`, `seqsero2`, `sistr`, `mlst`, `resfinder-family`, `prokka-family`
+
+**Priority for new challenges:** gene prediction → QC edge cases → population variant analysis (SNP pipeline, assembly, alignment, and AMR detection are well-covered)
+
+See `test/challenges/USAGE.md` for the toolchain reference (acquire/layout commands, tool families, challenge index). See `README.md` for design rationale, `MANIFEST_SCHEMA.md` for the manifest field reference, and `FAILURE_MODES.md` for the research catalog of known failure modes across all tool categories.
 
 ## Legacy Test Data (test/taxonomy/, test/resistance/)
 

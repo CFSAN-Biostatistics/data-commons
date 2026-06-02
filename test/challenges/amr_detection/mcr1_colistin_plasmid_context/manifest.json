@@ -1,0 +1,65 @@
+{
+  "name": "mcr1_colistin_plasmid_context",
+  "phenomenon": "amr_detection",
+  "challenge_tags": [
+    "amr_detection",
+    "in_silico_typing",
+    "silent_wrong_output",
+    "mobile_genetic_element",
+    "plasmid_context"
+  ],
+  "mechanism": "The mcr-1 colistin resistance gene, first described in 2015 (Liu et al., Lancet Infectious Diseases), encodes a plasmid-borne phosphoethanolamine transferase that modifies lipid A, reducing colistin binding. It is typically carried on conjugative plasmids (IncI2, IncHI2, IncX4) and is transferable to other E. coli strains and across genera. AMR detection tools (ResFinder, AMRFinderPlus, ABRicate) report 'mcr-1: present' without indicating whether the gene is on a plasmid (mobile, epidemiologically urgent) or integrated into the chromosome (less frequently transferable). From raw reads alone, there is no way to determine the chromosomal vs. plasmid location of a resistance gene — assembly and replicon typing are required. Tools that screen reads directly (SRST2, ARIBA) similarly cannot provide replicon context. The clinical implications are significant: plasmid-borne mcr-1 can disseminate rapidly through a hospital environment; chromosomally-integrated mcr-1 (which does occur after transposition) is less mobile. This E. coli isolate from a Chinese children's hospital carries mcr-1 on a plasmid — the challenge exposes the plasmid-blindness of read-based AMR screening tools.",
+  "tool_categories": ["in_silico_typing"],
+  "tool_families": ["resfinder-family"],
+  "known_behaviors": [
+    {
+      "tool": "ResFinder (read mapping mode)",
+      "behavior": "Reports mcr-1 present, colistin resistant. No replicon context. Cannot distinguish plasmid from chromosome from reads."
+    },
+    {
+      "tool": "AMRFinderPlus (assembly mode)",
+      "behavior": "Reports mcr-1 present. If assembly resolves the plasmid as a separate replicon, the gene will appear in the plasmid contig — but this requires successful plasmid assembly, which may fail with short reads."
+    },
+    {
+      "tool": "Abricate (on assembly)",
+      "behavior": "Reports mcr-1 with contig name. Only separates plasmid from chromosome if the assembler placed them on different contigs."
+    },
+    {
+      "tool": "MOB-suite or PlasmidFinder",
+      "behavior": "Replicon typing tools can identify IncI2 or IncHI2 replicon on the same contig as mcr-1, providing plasmid context. These are separate analyses not part of standard AMR pipelines."
+    }
+  ],
+  "samples": [
+    {
+      "id": "subject",
+      "role": "subject",
+      "description": "Escherichia coli EC08 from a Chinese children's hospital — mcr-1-positive isolate from PRJNA1461862 ('Whole-genome sequencing of child-derived mcr-1-positive Escherichia coli isolates from southern China'). mcr-1 is plasmid-borne. ~6.5M read pairs, Illumina PAIRED.",
+      "source_type": "sra",
+      "accession": "SRR38363847",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR38363847 && mv SRR38363847_1.fastq.gz reads_1.fq.gz && mv SRR38363847_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    }
+  ],
+  "ground_truth": {
+    "organism": "Escherichia coli",
+    "bioproject": "PRJNA1461862",
+    "biosample": "SAMN58320578",
+    "resistance_gene": "mcr-1",
+    "resistance_class": "colistin (polymyxin)",
+    "gene_location": "plasmid-borne",
+    "expected_detection": "mcr-1 detected by ResFinder/AMRFinderPlus/ABRicate",
+    "missing_context": "None of the standard AMR tools report that mcr-1 is on a transferable plasmid without additional replicon typing"
+  },
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "SRR38363847 is from the EC08 sample in PRJNA1461862, a study of mcr-1-positive E. coli from Chinese children (6.5M read pairs). The study explicitly investigates mcr-1-positive isolates, so mcr-1 presence is confirmed in the study context. The challenge is not about detecting mcr-1 — all tools detect it — but about the absence of replicon context in standard AMR reports. Colistin is a last-resort antibiotic; mcr-1 plasmid transferability makes it an urgent surveillance target. Pipelines that report only gene presence without replicon typing are missing the epidemiologically critical information."
+  }
+}

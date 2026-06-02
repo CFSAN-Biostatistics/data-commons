@@ -1,0 +1,69 @@
+{
+  "name": "disrupted_resistance_gene",
+  "phenomenon": "amr_detection",
+  "challenge_tags": [
+    "amr_detection",
+    "in_silico_typing",
+    "silent_wrong_output",
+    "pseudogene",
+    "frameshift"
+  ],
+  "mechanism": "A resistance gene with a 1-bp insertion frameshift at codon 67 is present in the assembly. The gene is at 100% nucleotide identity over its full length — tools that screen by BLAST identity and coverage report it as a perfect hit and predict resistance. However, the frameshift introduces a premature stop codon that truncates the protein at position 67 of 286 AAs. The resulting truncated protein (~24% of full length) cannot fold into the active beta-lactamase structure. The organism is NOT resistant despite the tool's prediction. This failure mode occurs in clinical practice when: a resistance gene is interrupted by IS element insertion during conjugation, a transposon excises imprecisely leaving a deletion, or a laboratory passage event introduces a mutation. Nucleotide-identity-based tools (ABRicate, ResFinder BLAST mode, basic AMRFinderPlus protein-boundary-unaware mode) report the gene as fully present because the alignment identity is 100% and coverage is 100%. Protein-aware tools with complete ORF checking (AMRFinderPlus with complete-allele validation, RGI with protein mode) may detect the truncation depending on version and configuration.",
+  "tool_categories": ["in_silico_typing"],
+  "tool_families": ["resfinder-family"],
+  "known_behaviors": [
+    {
+      "tool": "ABRicate",
+      "behavior": "Reports blaTEM-1 at 100% identity, 100% coverage. Predicts beta-lactam resistance. Does not validate protein ORF. Silent false positive."
+    },
+    {
+      "tool": "ResFinder (BLAST mode)",
+      "behavior": "Reports blaTEM-1 at 100% identity. The 1-bp insertion falls within the alignment but BLAST identity/coverage metrics are not affected by frameshifts in the same way protein tools are. Reports resistance."
+    },
+    {
+      "tool": "AMRFinderPlus",
+      "behavior": "Version-dependent. Newer versions with complete-protein validation may flag the gene as 'POINTN' (truncated) or 'partial'. Older versions report it as present. Check the 'Method' column in the output."
+    },
+    {
+      "tool": "RGI/CARD (protein mode)",
+      "behavior": "Protein-mode translation detects the premature stop codon. May report as 'Loose' or 'Partial' hit rather than 'Perfect'. Provides the most informative response."
+    }
+  ],
+  "samples": [
+    {
+      "id": "subject",
+      "role": "subject",
+      "description": "Synthetic assembly containing a blaTEM-1b gene with a 1-bp adenine insertion after position 200 of the CDS — creates a frameshift at codon 67, introducing a premature stop codon. The gene is flanked by 500 bp of random sequence. Nucleotide-based tools will report 100% identity over 100% of the gene length.",
+      "source_type": "recipe",
+      "files": {
+        "assembly": "subject_assembly.fasta"
+      },
+      "recipe": {
+        "description": "Insert a single 'A' at position 200 of blaTEM-1b CDS. This shifts the reading frame from codon 67 onward, generating a premature stop codon. Flanked by 500 bp of random sequence on each side. The full-length gene sequence (with insertion) is 862 bp.",
+        "inputs": [],
+        "tools_required": ["python3"],
+        "command": "python3 -c \"\nimport random\nrandom.seed(42)\nblatem1 = 'ATGAGTATTCAACATTTCCGTGTCGCCCTTATTCCCTTTTTTGCGGCATTTTGCCTTCCTGTTTTTGCTCACCCAGAAACGCTGGTGAAAGTAAAAGATGCTGAAGATCAGTTGGGTGCACGAGTGGGTTACATCGAACTGGATCTCAACAGCGGTAAGATCCTTGAGAGTTTTCGCCCCGAAGAACGTTTTCCAATGATGAGCACTTTTAAAGTTCTGCTATGTGGCGCGGTATTATCCCGTGTTGACGCCGGGCAAGAGCAACTCGGTCGCCGCATACACTATTCTCAGAATGACTTGGTTGAGTACTCACCAGTCACAGAAAAGCATCTTACGGATGGCATGACAGTAAGAGAATTATGCAGTGCTGCCATAACCATGAGTGATAACACTGCGGCCAACTTACTTCTGACAACGATCGGAGGACCGAAGGAGCTAACCGCTTTTTTGCACAACATGGGGGATCATGTAACTCGCCTTGATCGTTGGGAACCGGAGCTGAATGAAGCCATACCAAACGACGAGCGTGACACCACGATGCCTGCAGCAATGGCAACAACGTTGCGCAAACTATTAACTGGCGAACTACTTACTCTAGCTTCCCGGCAACAATTAATAGACTGGATGGAGGCGGATAAAGTTGCAGGTCCTTTATTACGTTCTGCTTTACCTGCTGGTTGGTTTATTGCTGATAAATCTGGTGCTGGTGAACGTGGTTCGCGGGGTATTATTGCTGCTTTAGGTCCTGATGGTAAACCTTCTCGTATTGTTGTTATTTATACTACTGGTTCACAAGCTACTATGGATGAACGTAATCGTCAAATTGCTGAAATTGGTGCTTCTTTAATTAAACATTGGTAA'\ninsert_pos = 200\ndisrupted = blatem1[:insert_pos] + 'A' + blatem1[insert_pos:]\nflanking1 = ''.join(random.choices('ACGT', k=500))\nflanking2 = ''.join(random.choices('ACGT', k=500))\ncontig = flanking1 + disrupted + flanking2\nwith open('subject_assembly.fasta', 'w') as f:\n    f.write('>synthetic_blatem1_frameshift_position200\\n')\n    for i in range(0, len(contig), 60):\n        f.write(contig[i:i+60] + '\\n')\n\""
+      },
+      "download": {
+        "command": "echo 'subject is recipe-based; run acquire.py to generate'",
+        "tool": "python3"
+      }
+    }
+  ],
+  "ground_truth": {
+    "gene_family": "blaTEM-1 beta-lactamase",
+    "resistance_class": "beta-lactam",
+    "gene_length_bp": 862,
+    "disruption": "1-bp insertion ('A') at position 200 of CDS — frameshift beginning at codon 67; premature stop codon at codon 71 of 286",
+    "functional_status": "non-functional — premature stop codon at codon 71; protein truncated to 70/286 AA (~24%)",
+    "nucleotide_identity_to_canonical": "~100% (1 insertion, no substitutions)",
+    "expected_phenotype": "NOT resistant despite gene presence",
+    "detection": "Compare ABRicate output (reports gene) to AMRFinderPlus with protein validation (may report as partial/disrupted). Translate the disrupted gene with `transeq` or Python and verify premature stop."
+  },
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "The 1-bp insertion is at position 200 of the CDS (within codon 67 of 286). This position is in the mature protein coding region after the signal peptide cleavage site (~23 AA). The resulting frameshift produces a premature stop codon at codon 71, truncating the protein to 70 AA. The challenge demonstrates that high nucleotide identity does not guarantee functional gene presence — protein-aware validation is required for accurate phenotype prediction. This phenomenon occurs in clinical isolates when resistance plasmids undergo IS-element disruption during passage."
+  }
+}

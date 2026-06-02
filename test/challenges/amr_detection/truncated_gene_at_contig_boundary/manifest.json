@@ -1,0 +1,72 @@
+{
+  "name": "truncated_gene_at_contig_boundary",
+  "phenomenon": "amr_detection",
+  "challenge_tags": [
+    "amr_detection",
+    "in_silico_typing",
+    "assembly",
+    "silent_wrong_output",
+    "fragmented_gene"
+  ],
+  "mechanism": "A resistance gene is split across two contigs in a draft assembly such that neither contig carries enough of the gene to exceed the minimum coverage threshold. ResFinder and AMRFinderPlus require a minimum gene coverage of 60% (by default) to report a hit — a fragment covering only 49% of the gene is silently ignored. The complete gene IS present in the sample; its DNA is fully represented in the read set. The failure is an assembly artifact: the gene straddles a repeat element or low-complexity region where the assembler breaks contig contiguity. This is especially common for mobile resistance elements (transposons, integrons) where IS element flanking sequences cause graph ambiguity. In draft assemblies with contig N50 below ~100 kb, blaKPC, blaOXA-48, and blaNDM are frequently split across contigs in real clinical isolates. The synthetic challenge uses blaTEM-1 (861 bp) split at position 430, placing 430 bp (49.9% coverage) on contig 1 and 431 bp (50.1%) on contig 2. Both fragments are below the 60% minimum coverage threshold and neither is reported by any standard tool.",
+  "tool_categories": ["in_silico_typing", "assembly"],
+  "tool_families": ["resfinder-family"],
+  "known_behaviors": [
+    {
+      "tool": "ResFinder (default --min_cov 0.60)",
+      "behavior": "Finds no hits — both fragments below 60% coverage. Exit 0. No warning that fragments exist near the threshold."
+    },
+    {
+      "tool": "ResFinder (--min_cov 0.40)",
+      "behavior": "Finds both fragments. Reports each as a partial hit with truncated alignment. Clinical interpretation of partial hits is undefined."
+    },
+    {
+      "tool": "AMRFinderPlus (assembly mode)",
+      "behavior": "Finds no hits at default 60% coverage. The HMMER/BLAST combination misses both partial fragments."
+    },
+    {
+      "tool": "ABRicate (default --mincov 80)",
+      "behavior": "Finds no hits — even more stringent minimum coverage than ResFinder."
+    },
+    {
+      "tool": "BLAST direct",
+      "behavior": "Finds both fragments as partial BLAST hits. Unlike wrapper tools, raw BLAST does not apply a minimum coverage filter and will report both. Demonstrates that the gene information exists but is filtered away by higher-level tools."
+    }
+  ],
+  "samples": [
+    {
+      "id": "subject",
+      "role": "subject",
+      "description": "Synthetic 2-contig assembly where blaTEM-1b (861 bp) is split at position 430: contig 1 carries the 5' end (430 bp = 49.9% of gene) and contig 2 carries the 3' end (431 bp = 50.1%), each flanked by 200 bp of random sequence. Neither contig meets the 60% minimum coverage threshold.",
+      "source_type": "recipe",
+      "files": {
+        "assembly": "subject_assembly.fasta"
+      },
+      "recipe": {
+        "description": "Split blaTEM-1b CDS at position 430/861. Contig 1: 200 bp random + first 430 bp of blaTEM-1 (49.9% coverage). Contig 2: last 431 bp of blaTEM-1 + 200 bp random (50.1% coverage). Both below default 60% coverage threshold.",
+        "inputs": [],
+        "tools_required": ["python3"],
+        "command": "python3 -c \"\nimport random\nrandom.seed(42)\nblatem1 = 'ATGAGTATTCAACATTTCCGTGTCGCCCTTATTCCCTTTTTTGCGGCATTTTGCCTTCCTGTTTTTGCTCACCCAGAAACGCTGGTGAAAGTAAAAGATGCTGAAGATCAGTTGGGTGCACGAGTGGGTTACATCGAACTGGATCTCAACAGCGGTAAGATCCTTGAGAGTTTTCGCCCCGAAGAACGTTTTCCAATGATGAGCACTTTTAAAGTTCTGCTATGTGGCGCGGTATTATCCCGTGTTGACGCCGGGCAAGAGCAACTCGGTCGCCGCATACACTATTCTCAGAATGACTTGGTTGAGTACTCACCAGTCACAGAAAAGCATCTTACGGATGGCATGACAGTAAGAGAATTATGCAGTGCTGCCATAACCATGAGTGATAACACTGCGGCCAACTTACTTCTGACAACGATCGGAGGACCGAAGGAGCTAACCGCTTTTTTGCACAACATGGGGGATCATGTAACTCGCCTTGATCGTTGGGAACCGGAGCTGAATGAAGCCATACCAAACGACGAGCGTGACACCACGATGCCTGCAGCAATGGCAACAACGTTGCGCAAACTATTAACTGGCGAACTACTTACTCTAGCTTCCCGGCAACAATTAATAGACTGGATGGAGGCGGATAAAGTTGCAGGTCCTTTATTACGTTCTGCTTTACCTGCTGGTTGGTTTATTGCTGATAAATCTGGTGCTGGTGAACGTGGTTCGCGGGGTATTATTGCTGCTTTAGGTCCTGATGGTAAACCTTCTCGTATTGTTGTTATTTATACTACTGGTTCACAAGCTACTATGGATGAACGTAATCGTCAAATTGCTGAAATTGGTGCTTCTTTAATTAAACATTGGTAA'\nsplit = 430\nfl1 = ''.join(random.choices('ACGT', k=200))\nfl2 = ''.join(random.choices('ACGT', k=200))\nfl3 = ''.join(random.choices('ACGT', k=200))\nfl4 = ''.join(random.choices('ACGT', k=200))\nc1 = fl1 + blatem1[:split]\nc2 = blatem1[split:] + fl2\nwith open('subject_assembly.fasta', 'w') as f:\n    f.write('>contig1_blatem1_5prime_430bp\\n')\n    for i in range(0, len(c1), 60): f.write(c1[i:i+60]+'\\n')\n    f.write('>contig2_blatem1_3prime_431bp\\n')\n    for i in range(0, len(c2), 60): f.write(c2[i:i+60]+'\\n')\n\""
+      },
+      "download": {
+        "command": "echo 'subject is recipe-based; run acquire.py to generate'",
+        "tool": "python3"
+      }
+    }
+  ],
+  "ground_truth": {
+    "gene_family": "blaTEM-1 beta-lactamase",
+    "resistance_class": "beta-lactam",
+    "gene_length_bp": 861,
+    "split_position_bp": 430,
+    "contig1_coverage": "49.9% (below 60% threshold)",
+    "contig2_coverage": "50.1% (below 60% threshold)",
+    "detection_threshold_breakpoint": "Gene detectable at --min_cov 0.40 but missed at default --min_cov 0.60"
+  },
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "The 430/431 split is chosen to be symmetric and just below threshold. In real assemblies, the split position is determined by where the assembler breaks contiguity (typically at a repeat flanking the resistance element). The challenge captures a genuine surveillance gap: draft assemblies from Illumina short reads regularly fragment resistance genes. Long-read assemblies (PacBio, ONT) resolve this by spanning the entire gene, which is the real solution — but is not always available in clinical or surveillance contexts."
+  }
+}

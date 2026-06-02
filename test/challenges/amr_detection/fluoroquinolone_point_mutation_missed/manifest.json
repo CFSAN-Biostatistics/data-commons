@@ -1,0 +1,69 @@
+{
+  "name": "fluoroquinolone_point_mutation_missed",
+  "phenomenon": "amr_detection",
+  "challenge_tags": [
+    "amr_detection",
+    "in_silico_typing",
+    "silent_wrong_output",
+    "point_mutation_resistance",
+    "tool_misconfiguration"
+  ],
+  "mechanism": "Campylobacter jejuni acquires fluoroquinolone resistance almost exclusively through a point mutation in gyrA (Thr-86-Ile, the most common; also Asp-90-Asn). Unlike most AMR detection challenges, no resistance gene is acquired — the resistance mechanism is a single nucleotide change in the core chromosome. ResFinder in default mode screens only for acquired resistance genes (horizontal gene transfer). Without the optional PointFinder module (invoked with the `--point` flag), it finds no quinolone resistance elements and predicts the organism as susceptible to ciprofloxacin — which is clinically false for isolates carrying gyrA T86I. AMRFinderPlus detects chromosomal point mutations when run with the `-O Campylobacter` organism flag; without the flag, it may also miss them. This failure mode is qualitatively different from gene-based screening: no database expansion will fix it. The user must invoke a different analysis mode entirely. The challenge uses real fluoroquinolone-resistant C. jejuni reads from an Australian chicken surveillance study (PRJNA509514, SAMN10583929).",
+  "tool_categories": ["in_silico_typing"],
+  "tool_families": ["resfinder-family"],
+  "known_behaviors": [
+    {
+      "tool": "ResFinder (default, no --point flag)",
+      "behavior": "Reports no quinolone resistance. Correctly reports tet(O) tetracycline resistance if present (acquired gene). Ciprofloxacin: 'No resistance'. Clinically false for this isolate."
+    },
+    {
+      "tool": "ResFinder (--point, species Campylobacter jejuni)",
+      "behavior": "Reports gyrA T86I -> Resistant to ciprofloxacin, nalidixic acid. Correct result."
+    },
+    {
+      "tool": "AMRFinderPlus (-O Campylobacter)",
+      "behavior": "Reports gyrA T86I as a point mutation conferring fluoroquinolone resistance. Correct when organism flag is supplied."
+    },
+    {
+      "tool": "AMRFinderPlus (no -O flag)",
+      "behavior": "May miss the point mutation entirely, reporting only acquired resistance genes."
+    },
+    {
+      "tool": "ABRicate",
+      "behavior": "No PointFinder equivalent. Always reports only acquired resistance genes. Will never detect gyrA point mutations regardless of configuration."
+    }
+  ],
+  "samples": [
+    {
+      "id": "subject",
+      "role": "subject",
+      "description": "Campylobacter jejuni DCI92Jejuni from Australian chicken surveillance — a fluoroquinolone-resistant isolate from PRJNA509514 ('Emergence of fluoroquinolone resistant Campylobacter jejuni and Campylobacter coli among Australian chickens in the absence of fluoroquinolone use'). Resistance is mediated by chromosomal gyrA T86I mutation, not acquired resistance genes. ~2.1M read pairs, Illumina PAIRED.",
+      "source_type": "sra",
+      "accession": "SRR8301919",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR8301919 && mv SRR8301919_1.fastq.gz reads_1.fq.gz && mv SRR8301919_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    }
+  ],
+  "ground_truth": {
+    "organism": "Campylobacter jejuni",
+    "bioproject": "PRJNA509514",
+    "biosample": "SAMN10583929",
+    "resistance_mechanism": "chromosomal gyrA point mutation",
+    "expected_mutation": "gyrA T86I (Thr-86-Ile) — the primary fluoroquinolone resistance determinant in C. jejuni",
+    "expected_phenotype": "Resistant to ciprofloxacin and nalidixic acid",
+    "acquired_resistance_genes": "likely none for quinolones — this is a point mutation challenge",
+    "detection": "Run ResFinder twice: once without --point, once with '--point -s Campylobacter_jejuni'. Only the second run should report quinolone resistance."
+  },
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "PRJNA509514 is explicitly a fluoroquinolone resistance study ('emergence of fluoroquinolone resistant C. jejuni from Australian chickens'). All isolates in the project are confirmed fluoroquinolone-resistant. SRR8301919 (2.1M spots, ~32x coverage for a 1.6 Mb C. jejuni genome) is a typical-sized Illumina WGS run from the project. The gyrA T86I mutation is the canonical mechanism — present in >90% of fluoroquinolone-resistant C. jejuni globally. The challenge highlights that some resistance mechanisms require active database query with organism context, and a tool run without the right flags will silently miss clinically important resistance."
+  }
+}

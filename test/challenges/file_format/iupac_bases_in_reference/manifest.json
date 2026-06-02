@@ -1,0 +1,82 @@
+{
+  "name": "iupac_bases_in_reference",
+  "phenomenon": "file_format",
+  "challenge_tags": [
+    "file_format",
+    "alignment",
+    "silent_wrong_output"
+  ],
+  "mechanism": "A reference FASTA containing IUPAC ambiguity codes (R, Y, K, M, S, W, B, D, H, V) beyond the standard N is submitted to alignment tools. IUPAC bases legitimately appear in reference genomes from NCBI when two alleles are present at a position in the assembly (common in diploid organisms and in some bacterial genome assemblies where heterozygosity is present). BWA-MEM, BWA-MEM2, Bowtie2, and Minimap2 all index IUPAC bases as N during index construction. A read base matching an IUPAC position is scored as a mismatch (since the reference base was indexed as N rather than the intended ambiguous base). Reads in IUPAC-rich regions accumulate spurious mismatches, their NM tag is elevated, and their MAPQ is reduced. In regions with high IUPAC density, reads may fail MAPQ thresholds and be excluded from variant calling entirely — silently losing coverage at positions where the reference explicitly acknowledges ambiguity.",
+  "tool_categories": ["alignment"],
+  "tool_families": ["bwa-family"],
+  "known_behaviors": [
+    {
+      "tool": "BWA-MEM",
+      "behavior": "IUPAC bases indexed as N. Reads at IUPAC positions show elevated NM tag. MAPQ reduced proportional to IUPAC density. No warning during indexing or alignment. Silent quality degradation."
+    },
+    {
+      "tool": "Bowtie2",
+      "behavior": "Same as BWA-MEM: indexes IUPAC as N. Silent."
+    },
+    {
+      "tool": "samtools faidx",
+      "behavior": "Successfully indexes a reference with IUPAC bases. No warning about non-ACGTN characters."
+    }
+  ],
+  "samples": [
+    {
+      "id": "iupac_reference",
+      "role": "reference",
+      "description": "Salmonella Typhimurium LT2 reference modified to replace 500 positions with IUPAC ambiguity codes — simulates a reference with heterozygous positions or an imperfectly assembled genome",
+      "source_type": "recipe",
+      "files": {
+        "assembly": "reference_with_iupac.fasta"
+      },
+      "recipe": {
+        "description": "Download LT2 reference and replace 500 randomly chosen positions with IUPAC codes (R, Y, K, M, S, W) using a deterministic seed. Introduces ~0.01% IUPAC density across the 4.9Mb genome — realistic for a genome with heterozygous positions.",
+        "inputs": ["clean_reference"],
+        "tools_required": ["python3"],
+        "command": "python3 -c \"\nimport random, gzip\nrandom.seed(42)\niupac = {'A': ['R','M','W'], 'T': ['Y','K','W'], 'G': ['R','K','S'], 'C': ['Y','M','S']}\nwith open('../clean_reference/assembly.fasta') as f:\n    lines = f.readlines()\nseq_lines = []\nheader = None\nfor line in lines:\n    if line.startswith('>'):\n        header = line\n    else:\n        seq_lines.append(line.rstrip())\nseq = list(''.join(seq_lines))\npositions = random.sample(range(len(seq)), 500)\nfor pos in positions:\n    base = seq[pos].upper()\n    if base in iupac:\n        seq[pos] = random.choice(iupac[base])\nwith open('reference_with_iupac.fasta', 'w') as f:\n    f.write(header)\n    full_seq = ''.join(seq)\n    for i in range(0, len(full_seq), 60):\n        f.write(full_seq[i:i+60] + '\\n')\n\""
+      },
+      "download": {
+        "command": "echo 'iupac_reference is recipe-based; run acquire.py to generate from clean_reference'",
+        "tool": "python3"
+      }
+    },
+    {
+      "id": "clean_reference",
+      "role": "reference",
+      "description": "Salmonella Typhimurium LT2 unmodified reference — downloaded first as input to the IUPAC modification recipe",
+      "source_type": "ncbi_assembly",
+      "accession": "GCF_000006945.2",
+      "files": {
+        "assembly": "assembly.fasta"
+      },
+      "download": {
+        "command": "datasets download genome accession GCF_000006945.2 --include genome --filename genome.zip && unzip -q genome.zip && cat ncbi_dataset/data/GCF_000006945.2/*.fna > assembly.fasta && rm -rf ncbi_dataset genome.zip README.md",
+        "tool": "ncbi-datasets-cli"
+      }
+    },
+    {
+      "id": "typhimurium_reads",
+      "role": "subject",
+      "description": "Salmonella Typhimurium reads to align against the IUPAC-modified reference",
+      "source_type": "sra",
+      "accession": "SRR38945246",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR38945246 && mv SRR38945246_1.fastq.gz reads_1.fq.gz && mv SRR38945246_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    }
+  ],
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "The 500-position IUPAC modification (~0.01% density) is conservative but detectable. The effect is measurable: compare NM tag distribution of alignments to the IUPAC reference vs. the clean reference — reads at modified positions should show NM+1. A density of 0.01% means ~500 positions in a 4.9Mb genome; at 50x coverage that is 25,000 read pairs with artifactual mismatches."
+  }
+}

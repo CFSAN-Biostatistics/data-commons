@@ -1,0 +1,67 @@
+{
+  "name": "circular_reference_linearization",
+  "phenomenon": "repetitive_genome",
+  "challenge_tags": [
+    "repetitive_genome",
+    "alignment",
+    "silent_wrong_output",
+    "file_format"
+  ],
+  "mechanism": "Bacterial chromosomes and plasmids are circular molecules, but reference genomes are stored as linear FASTA sequences with an arbitrary start position. Reads that physically span the linearization point — i.e., reads that originate from the region of the genome that straddles position 1 in the FASTA — cannot align end-to-end to the reference because the reference has an artificial break at that position. These reads are either unmapped, soft-clipped, or produce split alignments. For a 4.9 Mb chromosome with 150 bp paired-end reads, approximately 300-400 read pairs (~0.03% of a 50x dataset) are affected. The result is a systematic coverage gap at position 1 and at the last ~150 bp of every contig in the reference — a telltale pattern that is invisible to aggregate mapping statistics but visible in per-position coverage analysis. Variant callers silently miss variants in these regions.",
+  "tool_categories": ["alignment"],
+  "tool_families": ["bwa-family"],
+  "known_behaviors": [
+    {
+      "tool": "All short-read aligners (BWA-MEM, Bowtie2, Minimap2 sr)",
+      "behavior": "Coverage drops to zero or near-zero at positions 1 through ~read_length and at positions (contig_length - read_length) through contig_length. Not reported by samtools flagstat. Visible only via mosdepth or samtools depth. Silent."
+    },
+    {
+      "tool": "BWA-MEM",
+      "behavior": "Reads spanning the linearization point are split-aligned (SA supplementary tag). If the split alignment does not score well, the read is reported as soft-clipped or unmapped. Exit 0."
+    }
+  ],
+  "samples": [
+    {
+      "id": "reference",
+      "role": "reference",
+      "description": "Salmonella Typhimurium LT2 linearized reference — the chromosome is circular but stored as a linear FASTA starting at an arbitrary position",
+      "source_type": "ncbi_assembly",
+      "accession": "GCF_000006945.2",
+      "files": {
+        "assembly": "assembly.fasta"
+      },
+      "download": {
+        "command": "datasets download genome accession GCF_000006945.2 --include genome --filename genome.zip && unzip -q genome.zip && cat ncbi_dataset/data/GCF_000006945.2/*.fna > assembly.fasta && rm -rf ncbi_dataset genome.zip README.md",
+        "tool": "ncbi-datasets-cli"
+      }
+    },
+    {
+      "id": "typhimurium_reads",
+      "role": "subject",
+      "description": "Salmonella Typhimurium PNUSAS576962 reads — standard Illumina paired-end, ~60x coverage",
+      "source_type": "sra",
+      "accession": "SRR38945246",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR38945246 && mv SRR38945246_1.fastq.gz reads_1.fq.gz && mv SRR38945246_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    }
+  ],
+  "ground_truth": {
+    "reference_accession": "GCF_000006945.2",
+    "chromosome_length_bp": 4809037,
+    "expected_coverage_gap_positions": "1 through ~150 and ~4808887 through 4809037",
+    "reads_affected_estimate": "~300-400 pairs at 50x coverage",
+    "detection": "Run 'samtools depth -a' and inspect coverage at chromosome positions 1-300 and last 300 positions. Coverage should drop sharply relative to adjacent positions."
+  },
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "This challenge requires no unusual input data — it fires on any alignment of real Illumina reads to any bacterial reference genome. The LT2 reference is used here because its chromosome start position is well-documented (ori at position ~3.9 Mb, so position 1 is in the replication terminus region). The effect is small in aggregate but systematic: it creates false variant-free zones at every contig boundary in draft assemblies."
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "name": "mismatched_read_pairs",
+  "phenomenon": "degenerate_input",
+  "challenge_tags": [
+    "degenerate_input",
+    "alignment",
+    "silent_wrong_output",
+    "crash"
+  ],
+  "mechanism": "A paired-end FASTQ dataset where R1 and R2 have different numbers of reads is submitted to alignment tools. This occurs in practice after asymmetric adapter trimming (where one mate falls below the minimum length threshold and is dropped), incomplete file transfer, or pipeline errors that process the two read files independently. Different tools handle this inconsistency in completely different ways: Bowtie2 and STAR detect the mismatch and exit with an informative error; BWA-MEM in paired-end mode may hang waiting for a pair that never arrives, or silently mis-pair reads if the files are desynchronised. The most dangerous case is BWA-MEM with interleaved input (-p flag): if R1 and R2 are interleaved into a single file and one read is dropped, every subsequent pair is offset, producing systematic wrong pairing for the rest of the file with no error.",
+  "tool_categories": ["alignment"],
+  "tool_families": ["bwa-family"],
+  "known_behaviors": [
+    {
+      "tool": "BWA-MEM (-1/-2 mode)",
+      "behavior": "Behaviour is version-dependent: some versions hang; others print 'different number of sequences' and exit non-zero. Not guaranteed to catch the mismatch."
+    },
+    {
+      "tool": "Bowtie2",
+      "behavior": "Detects unequal read counts early and exits with a clear error message. Diagnosable."
+    },
+    {
+      "tool": "STAR",
+      "behavior": "Detects unequal read counts and exits with a clear error message. Diagnosable."
+    },
+    {
+      "tool": "BWA-MEM (-p interleaved mode)",
+      "behavior": "If the dropped read is mid-file, the remaining reads are systematically mis-paired. Every pair from the drop point onwards is wrong. Exit 0, valid BAM with wrong pair assignments."
+    }
+  ],
+  "samples": [
+    {
+      "id": "reference",
+      "role": "reference",
+      "description": "Salmonella Typhimurium LT2 reference",
+      "source_type": "ncbi_assembly",
+      "accession": "GCF_000006945.2",
+      "files": {
+        "assembly": "assembly.fasta"
+      },
+      "download": {
+        "command": "datasets download genome accession GCF_000006945.2 --include genome --filename genome.zip && unzip -q genome.zip && cat ncbi_dataset/data/GCF_000006945.2/*.fna > assembly.fasta && rm -rf ncbi_dataset genome.zip README.md",
+        "tool": "ncbi-datasets-cli"
+      }
+    },
+    {
+      "id": "mismatched_reads",
+      "role": "subject",
+      "description": "R1 with 1000 reads, R2 with 999 reads — the last R2 record is missing, simulating truncation mid-transfer",
+      "source_type": "recipe",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "recipe": {
+        "description": "Generate 1000 R1 reads and 999 R2 reads (R2 is missing its final record). Uses real-looking bases (ACGT) to pass quality filters.",
+        "inputs": [],
+        "tools_required": ["python3"],
+        "command": "python3 -c \"\nimport gzip, random\nrandom.seed(42)\nbases = 'ACGT'\ndef make_reads(path, count, length=150):\n    with gzip.open(path, 'wt') as f:\n        for i in range(count):\n            seq = ''.join(random.choices(bases, weights=[1,1,1,1], k=length))\n            f.write(f'@read_{i}\\n{seq}\\n+\\n' + 'I'*length + '\\n')\nmake_reads('reads_1.fq.gz', 1000)\nmake_reads('reads_2.fq.gz', 999)\n\""
+      },
+      "download": {
+        "command": "echo 'mismatched_reads is recipe-based; run acquire.py to generate'",
+        "tool": "python3"
+      }
+    }
+  ],
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "The 1000/999 mismatch is the minimal case. The more dangerous scenario is a mismatch partway through a large file (e.g., 5M/4.999M reads) where the error is undetectable by file size inspection alone. This challenge uses synthetic reads to keep the dataset small and reproducible."
+  }
+}

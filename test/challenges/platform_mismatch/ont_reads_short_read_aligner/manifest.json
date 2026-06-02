@@ -1,0 +1,63 @@
+{
+  "name": "ont_reads_short_read_aligner",
+  "phenomenon": "platform_mismatch",
+  "challenge_tags": [
+    "platform_mismatch",
+    "alignment",
+    "silent_wrong_output",
+    "confident_wrong_call"
+  ],
+  "mechanism": "Oxford Nanopore Technology (ONT) reads are submitted to an aligner configured for short Illumina reads. The most dangerous form of this failure occurs with Minimap2: using the '-ax sr' preset (short-read mode) on ONT data, or using BWA-MEM which has no long-read mode at all. ONT reads are 1–50 kb with a raw error rate of 8-15%, mostly homopolymer indels. The short-read aligner expects 150 bp reads with <1% error. The result is: (1) reads are fragmented into multiple short alignments rather than a single spanning alignment; (2) each fragment gets an independent MAPQ score that may be high; (3) structural variants and insertions are invisible because no single alignment spans them; (4) the homopolymer error signature produces false SNP calls throughout the genome. The BAM file looks valid, read counts appear normal, and no tool warns that the read length distribution is anomalous.",
+  "tool_categories": ["alignment"],
+  "tool_families": ["bwa-family"],
+  "known_behaviors": [
+    {
+      "tool": "BWA-MEM",
+      "behavior": "Splits each ONT read into multiple short supplementary alignments. Each split piece gets a separate MAPQ score. The primary alignment has high MAPQ but covers only a fraction of each ONT read. Homopolymer errors produce dense false SNP calls throughout. Exit 0."
+    },
+    {
+      "tool": "Minimap2 with -ax sr preset",
+      "behavior": "The sr preset uses k=21 and w=11, appropriate for 150bp reads. Applied to ONT reads averaging 10kb, it produces thousands of supplementary alignments per read (one per 21bp seed match). Coverage appears normal but every genomic position is covered by fragments of many different reads. SNP calling is chaotic. Exit 0."
+    },
+    {
+      "tool": "Minimap2 with -ax map-ont preset (correct)",
+      "behavior": "Uses k=15, w=10, and chaining parameters tuned for long reads. Produces single-alignment-per-read spanning alignments with soft-clipping at error-rich ends. This is the correct behavior and is included here as the comparison baseline."
+    }
+  ],
+  "samples": [
+    {
+      "id": "reference",
+      "role": "reference",
+      "description": "Salmonella Typhimurium LT2 — reference for alignment",
+      "source_type": "ncbi_assembly",
+      "accession": "GCF_000006945.2",
+      "files": {
+        "assembly": "assembly.fasta"
+      },
+      "download": {
+        "command": "datasets download genome accession GCF_000006945.2 --include genome --filename genome.zip && unzip -q genome.zip && cat ncbi_dataset/data/GCF_000006945.2/*.fna > assembly.fasta && rm -rf ncbi_dataset genome.zip README.md",
+        "tool": "ncbi-datasets-cli"
+      }
+    },
+    {
+      "id": "ont_reads",
+      "role": "subject",
+      "description": "Salmonella Typhimurium Oxford Nanopore reads (SRR37380174, PRJNA1377404) — long reads that should be aligned with map-ont, not sr preset",
+      "source_type": "sra",
+      "accession": "SRR37380174",
+      "files": {
+        "reads_long": "reads.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR37380174 && mv SRR37380174.fastq.gz reads.fq.gz",
+        "tool": "sra-tools"
+      }
+    }
+  ],
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "SRR37380174 is confirmed Typhimurium serovar (BioSample SAMN53769435), Oxford Nanopore, SINGLE layout (as expected for ONT), 266,224 reads from PRJNA1377404. The challenge is most instructive run twice: once with 'bwa mem' or 'minimap2 -ax sr' to show the failure, and once with 'minimap2 -ax map-ont' to show the correct output."
+  }
+}

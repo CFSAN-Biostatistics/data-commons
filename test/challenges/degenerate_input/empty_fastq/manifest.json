@@ -1,0 +1,75 @@
+{
+  "name": "empty_fastq",
+  "phenomenon": "degenerate_input",
+  "challenge_tags": [
+    "degenerate_input",
+    "alignment",
+    "assembly",
+    "in_silico_typing",
+    "qc",
+    "silent_empty_output"
+  ],
+  "mechanism": "A FASTQ file that is valid gzip format but contains zero sequence records is submitted to a pipeline. This occurs in practice when: a sequencing run produces no reads (instrument failure), a sample fails library QC and the file is created but not populated, or an upstream pipeline step produces an empty output file due to filtering. Most tools accept the file, produce an empty output, and exit 0. The pipeline reports completion. A user inspecting the output sees an empty TSV or a BAM with 0 reads mapped — but only if they check. Many automated pipelines do not check output file size and proceed to downstream steps with empty inputs, producing cascading failures with cryptic error messages several steps removed from the root cause.",
+  "tool_categories": ["alignment", "assembly", "in_silico_typing", "qc"],
+  "tool_families": ["bwa-family", "spades-family", "seqsero2"],
+  "known_behaviors": [
+    {
+      "tool": "BWA-MEM",
+      "behavior": "Exits 0, produces a valid BAM with only the SAM header. samtools flagstat reports '0 + 0 in total'. No warning or non-zero exit."
+    },
+    {
+      "tool": "SPAdes",
+      "behavior": "Exits non-zero with 'Error: Incorrect number of lines in FASTQ file' — one of the few tools that fails loudly."
+    },
+    {
+      "tool": "FastQC",
+      "behavior": "Produces a valid HTML report with all modules showing 0 reads and 'Basic Statistics: Fail'. Exits 0."
+    },
+    {
+      "tool": "SeqSero2",
+      "behavior": "Produces empty output TSV. Exit 0. No warning."
+    }
+  ],
+  "samples": [
+    {
+      "id": "reference",
+      "role": "reference",
+      "description": "Salmonella Typhimurium LT2 — reference for alignment (expected to produce empty BAM)",
+      "source_type": "ncbi_assembly",
+      "accession": "GCF_000006945.2",
+      "files": {
+        "assembly": "assembly.fasta"
+      },
+      "download": {
+        "command": "datasets download genome accession GCF_000006945.2 --include genome --filename genome.zip && unzip -q genome.zip && cat ncbi_dataset/data/GCF_000006945.2/*.fna > assembly.fasta && rm -rf ncbi_dataset genome.zip README.md",
+        "tool": "ncbi-datasets-cli"
+      }
+    },
+    {
+      "id": "empty_reads",
+      "role": "subject",
+      "description": "Empty FASTQ file — valid gzip format containing zero records",
+      "source_type": "recipe",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "recipe": {
+        "description": "Create empty gzip-compressed FASTQ files. The files are valid gzip (pass gzip -t) but contain no sequence records.",
+        "inputs": [],
+        "tools_required": ["gzip"],
+        "command": "echo -n | gzip > reads_1.fq.gz && echo -n | gzip > reads_2.fq.gz"
+      },
+      "download": {
+        "command": "echo 'empty_reads is recipe-based; run acquire.py to generate'",
+        "tool": "gzip"
+      }
+    }
+  ],
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "The empty FASTQ is perhaps the most trivially constructible challenge in the library, yet it reliably exposes silent failure modes across every tool category. Its clinical relevance is high: in surveillance pipelines, a failed library prep or a sample that did not amplify produces exactly this input. The real challenge is not that one tool fails, but that most tools succeed silently and pass the empty result to the next step."
+  }
+}

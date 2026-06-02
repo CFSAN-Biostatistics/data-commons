@@ -1,0 +1,70 @@
+{
+  "name": "all_n_reads",
+  "phenomenon": "degenerate_input",
+  "challenge_tags": [
+    "degenerate_input",
+    "alignment",
+    "assembly",
+    "in_silico_typing",
+    "silent_empty_output"
+  ],
+  "mechanism": "A FASTQ file where every base in every read is called as N (the IUPAC ambiguity code for 'any base') is submitted to analysis tools. This occurs in practice when: a basecaller fails and outputs all-N sequences rather than erroring, a truncated file is padded with N characters by a downstream processor, or an upstream format conversion step corrupts the base calls. N bases contribute no valid k-mers (they match nothing exactly), produce no seeds in alignment tools, and trigger no peaks in de Bruijn graph construction. Tools that count reads will see a non-zero read count — the file is not empty — but the reads carry zero biological information. Most tools map 0% of reads and produce empty output with exit 0, with no distinction between 'no reads aligned because the organism is wrong' and 'no reads aligned because the reads are uninformative N sequences'.",
+  "tool_categories": ["alignment", "assembly", "in_silico_typing"],
+  "tool_families": ["bwa-family", "spades-family", "seqsero2"],
+  "known_behaviors": [
+    {
+      "tool": "BWA-MEM",
+      "behavior": "All reads unmapped (flag 0x4). MAPQ=0 for all reads. Paired-mate rescue may place mate reads at MAPQ=0 positions. Exit 0, valid BAM."
+    },
+    {
+      "tool": "SPAdes",
+      "behavior": "Produces 0 contigs. BayesHammer error correction removes all-N reads. Exit 0. No warning that input was degenerate."
+    },
+    {
+      "tool": "FastQC",
+      "behavior": "Reports 100% N content in 'Per Base Sequence Quality' and 'Per Base N Content' modules. Flags FAIL. One of the few tools that detects this condition — but does not prevent downstream use."
+    }
+  ],
+  "samples": [
+    {
+      "id": "reference",
+      "role": "reference",
+      "description": "Salmonella Typhimurium LT2 reference",
+      "source_type": "ncbi_assembly",
+      "accession": "GCF_000006945.2",
+      "files": {
+        "assembly": "assembly.fasta"
+      },
+      "download": {
+        "command": "datasets download genome accession GCF_000006945.2 --include genome --filename genome.zip && unzip -q genome.zip && cat ncbi_dataset/data/GCF_000006945.2/*.fna > assembly.fasta && rm -rf ncbi_dataset genome.zip README.md",
+        "tool": "ncbi-datasets-cli"
+      }
+    },
+    {
+      "id": "n_reads",
+      "role": "subject",
+      "description": "1000 read pairs of 150bp, all bases N, quality scores all I (Phred 40) — valid FASTQ format, zero biological information",
+      "source_type": "recipe",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "recipe": {
+        "description": "Generate 1000 paired-end FASTQ records where every base is N and every quality score is I (Phred+33=40). Valid FASTQ format with non-zero read count.",
+        "inputs": [],
+        "tools_required": ["python3"],
+        "command": "python3 -c \"\nimport gzip\ndef make_reads(path, count=1000, length=150):\n    with gzip.open(path, 'wt') as f:\n        for i in range(count):\n            f.write(f'@read_{i}/1\\n')\n            f.write('N' * length + '\\n')\n            f.write('+\\n')\n            f.write('I' * length + '\\n')\nmake_reads('reads_1.fq.gz')\nmake_reads('reads_2.fq.gz')\n\""
+      },
+      "download": {
+        "command": "echo 'n_reads is recipe-based; run acquire.py to generate'",
+        "tool": "python3"
+      }
+    }
+  ],
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "Quality scores are set to I (Phred 40) so the reads pass quality filtering — the failure is in the base content, not the quality. This is important: a tool that pre-filters on quality would correctly discard low-quality reads but will pass these N-reads through to alignment/assembly."
+  }
+}

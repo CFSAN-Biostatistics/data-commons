@@ -1,0 +1,58 @@
+{
+  "name": "streptomyces_coverage_dropout",
+  "phenomenon": "extreme_gc",
+  "challenge_tags": [
+    "extreme_gc",
+    "assembly",
+    "alignment",
+    "silent_wrong_output"
+  ],
+  "mechanism": "Streptomyces coelicolor A3(2) has a genomic GC content of approximately 72%, among the highest of any sequenced bacterium. Standard Illumina library preparation introduces GC-dependent amplification bias: GC-rich fragments are underrepresented after PCR because the high melting temperature of GC-rich duplexes causes uneven denaturation and extension. The result is systematic coverage dropout at GC-rich loci throughout the genome. Because Streptomyces secondary metabolite biosynthetic gene clusters (BGCs) are typically concentrated in the GC-rich chromosomal arms, coverage dropout disproportionately affects the most biologically important regions. Assemblers receive sparse k-mer coverage in dropout regions: the de Bruijn graph is disconnected at these loci, producing assembly breaks. The assembled genome appears normal by aggregate statistics (N50, total length) but is missing genes in GC-rich regions. No assembler flags this — the assembly simply stops at dropout boundaries.",
+  "tool_categories": ["assembly", "alignment"],
+  "tool_families": ["spades-family", "bwa-family"],
+  "known_behaviors": [
+    {
+      "tool": "SPAdes",
+      "behavior": "Assembly breaks at GC-rich coverage dropout regions. Secondary metabolite biosynthetic gene clusters in the chromosomal arms are frequently fragmented or absent. The chromosome is assembled in many contigs rather than approaching the true 1-contig chromosome + 2 plasmids. Exit 0."
+    },
+    {
+      "tool": "BWA-MEM",
+      "behavior": "Low-coverage regions (GC dropout) produce coverage valleys in per-base depth analysis. Variant calling at these positions fails silently due to insufficient depth. No MAPQ or alignment-score warning about GC bias — it is invisible at the per-read level."
+    },
+    {
+      "tool": "FastQC",
+      "behavior": "Flags 'Per Sequence GC Content' as FAIL because the 72% GC distribution does not match FastQC's expected normal distribution centred at ~45%. This is a correct detection, but automated pipelines that gate on this FAIL may reject valid data."
+    }
+  ],
+  "samples": [
+    {
+      "id": "streptomyces_reads",
+      "role": "subject",
+      "description": "Streptomyces coelicolor A3(2) Illumina PAIRED WGS reads (PRJEB3084). Reference genome GCF_000203835.1 is 9.05 Mb, 72.1% GC, complete chromosome + 2 plasmids.",
+      "source_type": "sra",
+      "accession": "ERR16938122",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . ERR16938122 && mv ERR16938122_1.fastq.gz reads_1.fq.gz && mv ERR16938122_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    }
+  ],
+  "ground_truth": {
+    "reference_accession": "GCF_000203835.1",
+    "reference_organism": "Streptomyces coelicolor A3(2)",
+    "gc_content_percent": 72.1,
+    "genome_size_bp": 9054847,
+    "chromosomal_structure": "1 chromosome + 2 plasmids (SCP1, SCP2)",
+    "note": "GC dropout is expected to disproportionately affect the ~12 secondary metabolite biosynthetic gene clusters in the chromosomal arms. Detection: compute per-position GC content vs. per-position coverage from the aligned BAM. Coverage should show negative correlation with local GC content."
+  },
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "PRJEB3084 is a well-characterized Streptomyces coelicolor sequencing project. ERR16938122 has 1.56M read pairs, giving ~52x mean coverage over the 9.05Mb genome — sufficient to demonstrate the coverage dropout pattern without the confound of globally insufficient depth."
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "name": "rrna_operon_collapse",
+  "phenomenon": "repetitive_genome",
+  "challenge_tags": [
+    "repetitive_genome",
+    "assembly",
+    "silent_wrong_output"
+  ],
+  "mechanism": "Salmonella Typhimurium LT2 carries 7 identical (or near-identical) rrn operons, each containing 16S-ITS-23S-5S rRNA genes (~5.5 kb per operon). In the de Bruijn graph, these operons share all k-mers because their sequences are >99% identical. The assembler collapses them to a single consensus node. The assembled genome therefore contains 1 copy of the rrn operon where the true genome has 7. No assembler warns about this. The assembled genome appears otherwise complete: correct total length, normal N50. Downstream analyses that count rrn operons (genome completeness checks, rRNA copy number inference) produce wrong results silently. This is the most universal short-read assembly artifact — it affects every bacterium with more than one rrn operon.",
+  "tool_categories": ["assembly"],
+  "tool_families": ["spades-family"],
+  "known_behaviors": [
+    {
+      "tool": "SPAdes",
+      "behavior": "Collapses 7 rrn operons to 1 in the assembled genome. The assembly graph node representing the rrn operon has coverage ~7x the mean chromosomal coverage, which is visible in the assembly graph but not in the final FASTA. Exit 0, no warning."
+    },
+    {
+      "tool": "All short-read assemblers",
+      "behavior": "Universal behavior: any assembler that uses k-mers shorter than the divergent region between rrn copies (which is typically >5 kb for 16S-ITS-23S) will collapse the operons. Long-read assemblers (Flye, Canu) with reads spanning rrn-to-rrn junctions can resolve this."
+    }
+  ],
+  "samples": [
+    {
+      "id": "typhimurium_reads",
+      "role": "subject",
+      "description": "Salmonella Typhimurium PNUSAS576962 reads — organism with 7 rrn operons (ground truth from LT2 reference GCF_000006945.2)",
+      "source_type": "sra",
+      "accession": "SRR38945246",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR38945246 && mv SRR38945246_1.fastq.gz reads_1.fq.gz && mv SRR38945246_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    }
+  ],
+  "ground_truth": {
+    "reference_accession": "GCF_000006945.2",
+    "reference_organism": "Salmonella Typhimurium LT2",
+    "rrn_operon_count": 7,
+    "expected_assembled_rrn_count": 1,
+    "note": "Short-read assembly will contain 1 rrn operon. The 7-copy collapse is detectable by: (1) running barrnap on the assembly (counts 1 copy), (2) comparing the assembly node coverage at the rrn locus to mean chromosomal coverage (~7x elevated), (3) aligning the assembly to the LT2 reference and observing the single-copy gap."
+  },
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "This challenge requires no unusual input data — it fires on any normal Typhimurium WGS assembly. The value is in documenting the ground truth (7 operons) and providing a dataset where the failure can be verified. Any Salmonella, E. coli, Klebsiella, or other multi-rrn-operon species would demonstrate the same artifact."
+  }
+}

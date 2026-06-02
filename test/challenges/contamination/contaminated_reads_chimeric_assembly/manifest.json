@@ -1,0 +1,81 @@
+{
+  "name": "contaminated_reads_chimeric_assembly",
+  "phenomenon": "contamination",
+  "challenge_tags": [
+    "contamination",
+    "assembly",
+    "silent_wrong_output",
+    "mixed_organism"
+  ],
+  "mechanism": "A Salmonella Typhimurium read set is spiked with 20% E. coli K-12 reads before assembly. The two organisms are both Enterobacteriaceae (~98% ANI at housekeeping genes) and share conserved sequences including 16S rRNA, core metabolic genes, and IS elements. Their shared k-mers act as bridges in the de Bruijn graph, connecting otherwise distinct subgraphs. The assembler produces chimeric contigs at these bridge points — sequences that begin in Typhimurium genomic context and end in E. coli context. No assembler emits a contamination warning. The output FASTA passes basic QC metrics (N50, total length) and appears to be a reasonable 5-6 Mb assembly. Downstream typing tools (SeqSero2, mlst) receive chimeric sequences containing partial Salmonella antigen genes joined to E. coli flanking sequence.",
+  "tool_categories": ["assembly"],
+  "tool_families": ["spades-family"],
+  "known_behaviors": [
+    {
+      "tool": "SPAdes",
+      "behavior": "Assembles both organisms simultaneously. Shared k-mer regions (16S, housekeeping genes, IS elements) act as graph bridges. Produces chimeric contigs of plausible length. Total assembled length ~7-8 Mb (inflated beyond either genome alone). Exit 0, no contamination warning."
+    },
+    {
+      "tool": "SKESA",
+      "behavior": "More conservative overlap handling reduces chimera frequency but does not eliminate it. May discard some low-coverage E. coli contigs as noise, masking the contamination rather than flagging it."
+    }
+  ],
+  "samples": [
+    {
+      "id": "typhimurium_reads",
+      "role": "subject",
+      "description": "Salmonella Typhimurium PNUSAS576962 reads — the 'true' organism (80% of final read pool)",
+      "source_type": "sra",
+      "accession": "SRR38945246",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR38945246 && mv SRR38945246_1.fastq.gz reads_1.fq.gz && mv SRR38945246_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    },
+    {
+      "id": "ecoli_contaminant",
+      "role": "contaminant",
+      "description": "E. coli K-12 MG1655 reads — the contaminant (downsampled to 20% of Typhimurium read count)",
+      "source_type": "sra",
+      "accession": "SRR1770413",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR1770413 && mv SRR1770413_1.fastq.gz reads_1.fq.gz && mv SRR1770413_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    },
+    {
+      "id": "mixed_reads",
+      "role": "subject",
+      "description": "Final mixed read set: 100% Typhimurium reads + 20% E. coli reads concatenated — the input to the assembler",
+      "source_type": "recipe",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "recipe": {
+        "description": "Subsample E. coli reads to ~20% of Typhimurium read count (seed 42), then concatenate with Typhimurium reads. SRR38945246 has ~984k spots; 20% = ~197k E. coli spots.",
+        "inputs": ["typhimurium_reads", "ecoli_contaminant"],
+        "tools_required": ["seqtk"],
+        "command": "seqtk sample -s42 ../ecoli_contaminant/reads_1.fq.gz 196880 | gzip > ecoli_sub_1.fq.gz && seqtk sample -s42 ../ecoli_contaminant/reads_2.fq.gz 196880 | gzip > ecoli_sub_2.fq.gz && cat ../typhimurium_reads/reads_1.fq.gz ecoli_sub_1.fq.gz > reads_1.fq.gz && cat ../typhimurium_reads/reads_2.fq.gz ecoli_sub_2.fq.gz > reads_2.fq.gz && rm ecoli_sub_1.fq.gz ecoli_sub_2.fq.gz"
+      },
+      "download": {
+        "command": "echo 'mixed_reads is recipe-based; run acquire.py to generate from typhimurium_reads and ecoli_contaminant'",
+        "tool": "seqtk"
+      }
+    }
+  ],
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "20% contamination fraction is chosen to exceed typical contamination detection thresholds while remaining plausible as a lab cross-contamination event. At 20%, the E. coli coverage is ~10-12x — above the k-mer frequency threshold that SPAdes would discard as sequencing error, so the contaminant actively participates in graph construction."
+  }
+}

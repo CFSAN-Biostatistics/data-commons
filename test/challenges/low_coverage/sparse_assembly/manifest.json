@@ -1,0 +1,70 @@
+{
+  "name": "sparse_assembly",
+  "phenomenon": "low_coverage",
+  "challenge_tags": [
+    "low_coverage",
+    "assembly",
+    "crash",
+    "silent_wrong_output"
+  ],
+  "mechanism": "A normal-coverage Salmonella Typhimurium read set is downsampled to approximately 3x genome coverage before assembly. At 3x coverage, the majority of k-mers appear only once in the dataset and are indistinguishable from sequencing errors. SPAdes includes a read error correction step (BayesHammer) that removes low-frequency k-mers as errors; at 3x, this correction discards a significant fraction of genuine reads, leaving even sparser coverage for assembly. The resulting de Bruijn graph is almost entirely disconnected. Different assemblers fail in different characteristic ways: SPAdes may produce an extremely fragmented assembly or error-exit; SKESA has a minimum coverage cutoff and exits with no assembly; Flye explicitly requires minimum 3x and may crash; Velvet assembles but produces thousands of tiny contigs. Most tools exit 0 with either an empty FASTA or a useless fragmented output — the failure is not surfaced as an error.",
+  "tool_categories": ["assembly"],
+  "tool_families": ["spades-family"],
+  "known_behaviors": [
+    {
+      "tool": "SPAdes",
+      "behavior": "BayesHammer error correction removes too many reads. May produce empty assembly or assembly with >10,000 tiny contigs. The --cov-cutoff parameter may remove remaining contigs as 'low-coverage.' Exit 0 in many versions even with zero output contigs."
+    },
+    {
+      "tool": "SKESA",
+      "behavior": "Hard minimum coverage filter. Exits with non-zero code and message about insufficient coverage, or produces empty output with exit 0 depending on version."
+    },
+    {
+      "tool": "Flye",
+      "behavior": "Detects low coverage and exits with explicit 'No disjointigs' error — the most diagnosable of the assemblers."
+    }
+  ],
+  "samples": [
+    {
+      "id": "typhimurium_source",
+      "role": "subject",
+      "description": "Salmonella Typhimurium PNUSAS576962 full-coverage reads — source for downsampling (PRJNA230403, ~60x coverage)",
+      "source_type": "sra",
+      "accession": "SRR38945246",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR38945246 && mv SRR38945246_1.fastq.gz reads_1.fq.gz && mv SRR38945246_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    },
+    {
+      "id": "low_cov_reads",
+      "role": "subject",
+      "description": "SRR38945246 downsampled to ~3x coverage — the actual challenge input (49,350 read pairs from 984,395 source pairs)",
+      "source_type": "recipe",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "recipe": {
+        "description": "Downsample to 5% of read pairs (984,395 × 0.05 = 49,220 pairs ≈ 3x coverage of 4.9Mb genome at 150bp reads). Seed 42 for reproducibility.",
+        "inputs": ["typhimurium_source"],
+        "tools_required": ["seqtk"],
+        "command": "seqtk sample -s42 ../typhimurium_source/reads_1.fq.gz 0.05 | gzip > reads_1.fq.gz && seqtk sample -s42 ../typhimurium_source/reads_2.fq.gz 0.05 | gzip > reads_2.fq.gz"
+      },
+      "download": {
+        "command": "echo 'low_cov_reads is recipe-based; run acquire.py to generate from typhimurium_source'",
+        "tool": "seqtk"
+      }
+    }
+  ],
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "5% downsampling of SRR38945246 (~984k pairs at ~60x) yields ~49k pairs = ~3x coverage of the 4.9Mb Typhimurium genome at 150bp per read. This is below the SPAdes BayesHammer threshold for reliable error correction and at or below the minimum useful coverage for de Bruijn graph assembly. The challenge intentionally targets the regime where tools differ in their failure mode: Flye crashes loudly, SPAdes fails silently."
+  }
+}

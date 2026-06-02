@@ -1,0 +1,62 @@
+{
+  "name": "is_element_collapse_ecoli",
+  "phenomenon": "repetitive_genome",
+  "challenge_tags": [
+    "repetitive_genome",
+    "assembly",
+    "silent_wrong_output"
+  ],
+  "mechanism": "E. coli K-12 MG1655 carries approximately 42 insertion sequence (IS) element copies: IS1 (8×), IS2 (5×), IS3 (5×), IS5 (5×), IS10 (2×), IS150 (2×), IS186 (2×), IS30 (2×), IS600 (1×), and others. Each IS element is a unit of 750-1500 bp that is nearly identical across all copies. In the de Bruijn graph, all copies of each IS family share k-mers and collapse to a single node. The assembled genome therefore represents each IS family as 1 copy regardless of true copy number. Because IS elements frequently flank resistance genes and mediate chromosomal rearrangements, their copy number and chromosomal context are clinically significant — but the assembled genome gives no indication that multiple copies exist. The flanking sequences of different IS insertions are joined incorrectly into the single IS node, creating chimeric junctions at every IS locus.",
+  "tool_categories": ["assembly"],
+  "tool_families": ["spades-family"],
+  "known_behaviors": [
+    {
+      "tool": "SPAdes",
+      "behavior": "Collapses each IS element family to 1 representative contig. Flanking sequences from all insertion sites are joined to that single IS node; the assembler chooses one flanking path arbitrarily. Assembly graph has elevated coverage at IS nodes (~8-42x mean for IS1, depending on copy number). Exit 0, no warning."
+    },
+    {
+      "tool": "All short-read assemblers",
+      "behavior": "Universal: IS elements are short enough that reads spanning them in both directions are common, but the identical internal sequences force collapse. Total gene count in the assembly is understated; gene order between IS loci is wrong."
+    }
+  ],
+  "samples": [
+    {
+      "id": "ecoli_k12",
+      "role": "subject",
+      "description": "E. coli K-12 MG1655 Illumina reads (SRR1770413, MiSeq PAIRED). Reference genome GCF_000005845.2 has ~42 IS element copies in 10 IS families.",
+      "source_type": "sra",
+      "accession": "SRR1770413",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR1770413 && mv SRR1770413_1.fastq.gz reads_1.fq.gz && mv SRR1770413_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    }
+  ],
+  "ground_truth": {
+    "reference_accession": "GCF_000005845.2",
+    "reference_organism": "Escherichia coli K-12 MG1655",
+    "is_element_copies": {
+      "IS1": 8,
+      "IS2": 5,
+      "IS3": 5,
+      "IS5": 5,
+      "IS10": 2,
+      "IS150": 2,
+      "IS186": 2,
+      "IS30": 2,
+      "total_approx": 42
+    },
+    "expected_assembled_copies_per_family": 1,
+    "note": "Detection: run ISEScan or ISfinder BLAST on the assembled genome and compare copy counts to the reference. Alternatively, compute mean coverage of IS element contigs vs. chromosomal non-repetitive contigs — IS nodes will show proportionally elevated coverage."
+  },
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "E. coli K-12 MG1655 is the ideal organism for this challenge: its IS element content is fully annotated, its reference genome is complete and single-contig, and SRR1770413 provides well-characterized Illumina MiSeq reads. The same organism is used as the wrong-organism control in wrong_organism/ecoli_to_seqsero2, making cross-challenge comparisons natural."
+  }
+}

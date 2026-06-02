@@ -44,6 +44,55 @@ def check_tool(tool: str) -> bool:
     ).returncode == 0
 
 
+def run_recipe(sample: dict, data_dir: Path, force: bool) -> bool:
+    """Execute a recipe to construct a synthetic sample. Returns True on success."""
+    sample_id = sample["id"]
+    sample_dir = data_dir / sample_id
+    sample_dir.mkdir(parents=True, exist_ok=True)
+
+    if not force:
+        expected_files = list(sample.get("files", {}).values())
+        if expected_files and all((sample_dir / f).exists() for f in expected_files):
+            log(f"  {sample_id}: recipe output already present, skipping")
+            return True
+
+    recipe = sample.get("recipe", {})
+    inputs = recipe.get("inputs", [])
+    tools_required = recipe.get("tools_required", [])
+
+    # Verify input samples were already downloaded
+    for input_id in inputs:
+        input_dir = data_dir / input_id
+        if not input_dir.exists():
+            error(
+                f"Recipe input '{input_id}' not yet downloaded. "
+                f"Samples are downloaded in manifest order — check that '{input_id}' "
+                f"appears before '{sample_id}' in the manifest."
+            )
+
+    # Verify required tools
+    for tool in tools_required:
+        if not check_tool(tool):
+            error(f"Recipe requires '{tool}' which was not found in PATH.")
+
+    cmd = recipe.get("command", "")
+    log(f"  {sample_id}: running recipe ({recipe.get('description', '')})")
+    log(f"  command: {cmd}")
+
+    result = subprocess.run(cmd, shell=True, cwd=sample_dir)
+    if result.returncode != 0:
+        error(f"Recipe failed for sample '{sample_id}' (exit {result.returncode})")
+        return False
+
+    for role, filename in sample.get("files", {}).items():
+        if not (sample_dir / filename).exists():
+            error(f"Recipe did not produce expected file '{filename}' (role: {role})")
+            return False
+
+    log(f"  {sample_id}: recipe done")
+    return True
+
+
 def download_sample(sample: dict, data_dir: Path, force: bool) -> bool:
     """Download a single sample's data. Returns True on success."""
     sample_dir = data_dir / sample["id"]
@@ -56,6 +105,11 @@ def download_sample(sample: dict, data_dir: Path, force: bool) -> bool:
             log(f"  {sample['id']}: already present, skipping (use --force to re-download)")
             return True
 
+    source_type = sample.get("source_type", "")
+
+    if source_type == "recipe":
+        return run_recipe(sample, data_dir, force)
+
     tool = sample["download"]["tool"]
     tool_binary = tool.split("-")[0] if tool == "ncbi-datasets-cli" else tool
     tool_binary = "datasets" if tool == "ncbi-datasets-cli" else tool_binary
@@ -67,7 +121,7 @@ def download_sample(sample: dict, data_dir: Path, force: bool) -> bool:
         )
 
     cmd = sample["download"]["command"]
-    log(f"  {sample['id']}: downloading ({sample.get('source_type', 'unknown')} / {sample.get('accession', 'no accession')})")
+    log(f"  {sample['id']}: downloading ({source_type} / {sample.get('accession', 'no accession')})")
     log(f"  command: {cmd}")
 
     result = subprocess.run(

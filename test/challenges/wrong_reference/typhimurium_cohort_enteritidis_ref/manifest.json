@@ -1,0 +1,91 @@
+{
+  "name": "typhimurium_cohort_enteritidis_ref",
+  "phenomenon": "wrong_reference",
+  "challenge_tags": [
+    "wrong_reference",
+    "population_variant_analysis",
+    "silent_wrong_output",
+    "inflated_snp_count",
+    "core_genome_collapse"
+  ],
+  "mechanism": "Three Salmonella Typhimurium isolates are run through a SNP pipeline using a Salmonella Enteritidis reference genome (P125109, GCF_000009505.1). Typhimurium and Enteritidis are both serogroup O:4 and O:9 respectively, members of subspecies I, but differ by thousands of fixed SNPs and major chromosomal rearrangements in the rfb (O-antigen) region. Reads still map — Enterobacteriaceae are closely related enough for partial alignment — but: (1) thousands of fixed between-serovar differences are called as SNPs, inflating apparent diversity by orders of magnitude; (2) regions of chromosomal rearrangement fail to align, shrinking the core genome; (3) the phylogeny reflects serovar-divergence positions rather than true within-cohort variation. The pipeline exits 0 with a populated SNP matrix and phylogeny that appears valid but is biologically wrong.",
+  "tool_categories": ["population_variant_analysis"],
+  "tool_families": ["snippy-family", "cfsan-snp-pipeline"],
+  "known_behaviors": [
+    {
+      "tool": "snippy",
+      "behavior": "Maps reads successfully (Typhimurium and Enteritidis are ~98% ANI); reports thousands of SNPs per sample relative to the Enteritidis reference. The core genome shrinks in rearranged regions but does not collapse to zero — unlike the sample-swap case, a valid but wrong alignment output is produced."
+    },
+    {
+      "tool": "snippy-core",
+      "behavior": "Produces a core alignment with many SNPs. Exit 0. The SNP count appears to reflect a highly diverse outbreak, which is the opposite of the true epidemiological picture."
+    }
+  ],
+  "samples": [
+    {
+      "id": "reference",
+      "role": "reference",
+      "description": "Salmonella Enteritidis str. P125109 — WRONG reference for a Typhimurium cohort; same species but different serovar",
+      "source_type": "ncbi_assembly",
+      "accession": "GCF_000009505.1",
+      "files": {
+        "assembly": "assembly.fasta"
+      },
+      "download": {
+        "command": "datasets download genome accession GCF_000009505.1 --include genome --filename genome.zip && unzip -q genome.zip && cat ncbi_dataset/data/GCF_000009505.1/*.fna > assembly.fasta && rm -rf ncbi_dataset genome.zip README.md",
+        "tool": "ncbi-datasets-cli"
+      }
+    },
+    {
+      "id": "ingroup_1",
+      "role": "ingroup",
+      "description": "Salmonella Typhimurium PNUSAS576962 — PulseNet surveillance isolate (PRJNA230403)",
+      "source_type": "sra",
+      "accession": "SRR38945246",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR38945246 && mv SRR38945246_1.fastq.gz reads_1.fq.gz && mv SRR38945246_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    },
+    {
+      "id": "ingroup_2",
+      "role": "ingroup",
+      "description": "Salmonella Typhimurium PNUSAS577744 — PulseNet surveillance isolate (PRJNA230403)",
+      "source_type": "sra",
+      "accession": "SRR38944463",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR38944463 && mv SRR38944463_1.fastq.gz reads_1.fq.gz && mv SRR38944463_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    },
+    {
+      "id": "ingroup_3",
+      "role": "ingroup",
+      "description": "Salmonella Typhimurium PNUSAS578491 — PulseNet surveillance isolate (PRJNA230403)",
+      "source_type": "sra",
+      "accession": "SRR38944085",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR38944085 && mv SRR38944085_1.fastq.gz reads_1.fq.gz && mv SRR38944085_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    }
+  ],
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "Same three PulseNet Typhimurium ingroup samples as contamination/sample_swap_ecoli_in_typhimurium, but with Enteritidis P125109 as reference instead of LT2. The challenge isolates the reference-selection failure mode independently from sample contamination."
+  }
+}

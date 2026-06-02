@@ -1,0 +1,110 @@
+{
+  "name": "mixed_lineages_st19_st34",
+  "phenomenon": "contamination",
+  "challenge_tags": [
+    "contamination",
+    "mixed_population",
+    "population_variant_analysis",
+    "silent_wrong_output",
+    "inflated_snp_count"
+  ],
+  "mechanism": "A SNP cohort contains both ST19 and ST34 Salmonella Typhimurium isolates submitted as a single clonal population. ST34 differs from ST19 by a single MLST allele (aroC) and a broader set of accessory genome differences. The inter-lineage SNP density (~100-300 SNPs) is orders of magnitude higher than the expected within-outbreak range (~0-20 SNPs). Tools like Gubbins interpret high-density SNP clusters as recombination imports rather than lineage divergence: the inter-lineage SNPs are systematically misclassified as recombinant blocks, r/m estimates are wildly inflated, and the recombination-corrected phylogeny may invert true cluster relationships. The pipeline exits 0 with a plausible-looking tree.",
+  "tool_categories": ["population_variant_analysis"],
+  "tool_families": ["snippy-family"],
+  "known_behaviors": [
+    {
+      "tool": "Gubbins",
+      "behavior": "Classifies the ST19/ST34 divergence positions as recombinant blocks spanning hundreds of kb. Reports r/m >> 1 (often 5-20x inflated). The resulting recombination-masked phylogeny may show ST19 and ST34 isolates interleaved or collapsed rather than in two distinct clades."
+    },
+    {
+      "tool": "ClonalFrameML",
+      "behavior": "Similar to Gubbins: inter-lineage divergence is modelled as frequent gene conversion events. r/m estimates are unreliable. MCMC may not converge on datasets with this level of between-group divergence."
+    },
+    {
+      "tool": "snippy-core",
+      "behavior": "Produces a valid core alignment with elevated SNP count. Exit 0. The inflation of apparent diversity is not flagged."
+    }
+  ],
+  "samples": [
+    {
+      "id": "reference",
+      "role": "reference",
+      "description": "Salmonella Typhimurium LT2 — canonical complete Typhimurium reference",
+      "source_type": "ncbi_assembly",
+      "accession": "GCF_000006945.2",
+      "files": {
+        "assembly": "assembly.fasta"
+      },
+      "download": {
+        "command": "datasets download genome accession GCF_000006945.2 --include genome --filename genome.zip && unzip -q genome.zip && cat ncbi_dataset/data/GCF_000006945.2/*.fna > assembly.fasta && rm -rf ncbi_dataset genome.zip README.md",
+        "tool": "ncbi-datasets-cli"
+      }
+    },
+    {
+      "id": "st19_1",
+      "role": "ingroup",
+      "description": "Salmonella Typhimurium ST19 — PNUSAS576962, PulseNet surveillance (PRJNA230403)",
+      "source_type": "sra",
+      "accession": "SRR38945246",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR38945246 && mv SRR38945246_1.fastq.gz reads_1.fq.gz && mv SRR38945246_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    },
+    {
+      "id": "st19_2",
+      "role": "ingroup",
+      "description": "Salmonella Typhimurium ST19 — PNUSAS578491, PulseNet surveillance (PRJNA230403)",
+      "source_type": "sra",
+      "accession": "SRR38944085",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR38944085 && mv SRR38944085_1.fastq.gz reads_1.fq.gz && mv SRR38944085_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    },
+    {
+      "id": "st34_1",
+      "role": "ingroup",
+      "description": "Salmonella Typhimurium ST34 — PRJEB50816 surveillance isolate; differs from ST19 at aroC locus",
+      "source_type": "sra",
+      "accession": "ERR12019226",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . ERR12019226 && mv ERR12019226_1.fastq.gz reads_1.fq.gz && mv ERR12019226_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    },
+    {
+      "id": "st34_2",
+      "role": "ingroup",
+      "description": "Salmonella Typhimurium ST34 — PRJEB50816 surveillance isolate",
+      "source_type": "sra",
+      "accession": "ERR12019227",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . ERR12019227 && mv ERR12019227_1.fastq.gz reads_1.fq.gz && mv ERR12019227_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    }
+  ],
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "ST19 samples from PulseNet PRJNA230403 (confirmed serovar=Typhimurium in BioSample). ST34 samples from PRJEB50816 (confirmed serovar=Typhimurium; ST34 confirmed by search metadata). The challenge has 2 ST19 + 2 ST34 samples so Gubbins sees a bimodal SNP density distribution that it cannot distinguish from recombination."
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "name": "helicobacter_pylori_cohort",
+  "phenomenon": "high_recombination",
+  "challenge_tags": [
+    "high_recombination",
+    "population_variant_analysis",
+    "silent_wrong_output"
+  ],
+  "mechanism": "Helicobacter pylori has one of the highest recombination rates of any bacterial pathogen — r/m estimates of 10-50 are typical, meaning imported sequence is 10-50x more common than point mutations as the source of new SNPs. When a cohort of H. pylori isolates is analyzed with a standard clonal SNP pipeline (snippy + snippy-core + RAxML or IQ-TREE), the resulting phylogeny reflects the recombination history of the isolates, not their clonal genealogy. Strains that share recent common ancestry may be placed on distant tree branches if their recombination patterns differ. Tools like Gubbins are designed to correct for this, but at r/m > 10, the iterative algorithm may fail to converge, masking progressively larger fractions of the genome until the residual alignment is too short for reliable tree inference. The pipeline exits 0 at every stage.",
+  "tool_categories": ["population_variant_analysis"],
+  "tool_families": ["snippy-family"],
+  "known_behaviors": [
+    {
+      "tool": "snippy-core + RAxML",
+      "behavior": "Produces a tree that clusters isolates by recombination profile rather than true genealogy. High bootstrap values for incorrect topology — the tree looks well-supported. No warning."
+    },
+    {
+      "tool": "Gubbins",
+      "behavior": "At high r/m, the iterative recombination-masking algorithm often fails to converge within the default iteration limit (5-10). May mask >70% of the genome as recombinant, leaving an alignment too short for RAxML. Alternatively, exits after max iterations with the last (unstable) result and no convergence warning."
+    },
+    {
+      "tool": "ClonalFrameML",
+      "behavior": "Designed to handle high recombination but numerically unstable at r/m > 10. MCMC may not converge in practical run time. r/m point estimates are unreliable."
+    }
+  ],
+  "samples": [
+    {
+      "id": "reference",
+      "role": "reference",
+      "description": "Helicobacter pylori 26695 — canonical complete H. pylori reference genome",
+      "source_type": "ncbi_assembly",
+      "accession": "GCF_000008525.1",
+      "files": {
+        "assembly": "assembly.fasta"
+      },
+      "download": {
+        "command": "datasets download genome accession GCF_000008525.1 --include genome --filename genome.zip && unzip -q genome.zip && cat ncbi_dataset/data/GCF_000008525.1/*.fna > assembly.fasta && rm -rf ncbi_dataset genome.zip README.md",
+        "tool": "ncbi-datasets-cli"
+      }
+    },
+    {
+      "id": "hpylori_1",
+      "role": "ingroup",
+      "description": "Helicobacter pylori clinical isolate — PRJDB39362",
+      "source_type": "sra",
+      "accession": "DRR855617",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . DRR855617 && mv DRR855617_1.fastq.gz reads_1.fq.gz && mv DRR855617_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    },
+    {
+      "id": "hpylori_2",
+      "role": "ingroup",
+      "description": "Helicobacter pylori clinical isolate — PRJDB39362",
+      "source_type": "sra",
+      "accession": "DRR855618",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . DRR855618 && mv DRR855618_1.fastq.gz reads_1.fq.gz && mv DRR855618_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    },
+    {
+      "id": "hpylori_3",
+      "role": "ingroup",
+      "description": "Helicobacter pylori clinical isolate — PRJDB39362",
+      "source_type": "sra",
+      "accession": "DRR855619",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . DRR855619 && mv DRR855619_1.fastq.gz reads_1.fq.gz && mv DRR855619_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    },
+    {
+      "id": "hpylori_4",
+      "role": "ingroup",
+      "description": "Helicobacter pylori clinical isolate — PRJDB39362",
+      "source_type": "sra",
+      "accession": "DRR855620",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . DRR855620 && mv DRR855620_1.fastq.gz reads_1.fq.gz && mv DRR855620_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    }
+  ],
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "All four isolates from PRJDB39362 (confirmed Helicobacter pylori, Illumina PAIRED). H. pylori is the canonical example of a high-recombination pathogen in the microbial genomics literature. The challenge documents the failure mode even when the correct tool (Gubbins) is applied — the organism's biology defeats the statistical model."
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "name": "outlier_in_typhimurium_cohort",
+  "phenomenon": "low_coverage",
+  "challenge_tags": [
+    "low_coverage",
+    "population_variant_analysis",
+    "silent_wrong_output",
+    "core_genome_collapse"
+  ],
+  "mechanism": "A cohort of three Salmonella Typhimurium isolates at normal coverage (~50x) includes one additional sample downsampled to ~5x coverage. At 5x, many positions fail snippy's minimum coverage threshold (--mincov, default 10). The low-coverage sample generates N calls at all under-threshold positions. snippy-core intersects all samples: every position that is N in the low-coverage sample becomes non-core for the entire dataset, shrinking the core genome proportionally to the fraction of the genome covered at ≥10x in the 5x sample (~30-50% of positions). The resulting SNP distances to the low-coverage sample are systematically underestimated (missing data treated as matches), and pairwise distances between the normal-coverage samples are also reduced by the shrinkage. The pipeline exits 0 with a plausible-looking phylogeny with compressed branch lengths.",
+  "tool_categories": ["population_variant_analysis"],
+  "tool_families": ["snippy-family", "cfsan-snp-pipeline"],
+  "known_behaviors": [
+    {
+      "tool": "snippy",
+      "behavior": "Runs successfully on the low-coverage sample. Reports lower variant counts than the other samples but no coverage warning in the main output. The per-base depth distribution is not summarized in the TSV output."
+    },
+    {
+      "tool": "snippy-core",
+      "behavior": "The --mincov threshold applied to the low-coverage sample forces many positions to N. Core genome shrinks. Exit 0. Branch lengths in the resulting tree are shorter than the true values; the low-coverage sample appears artificially close to all other samples."
+    }
+  ],
+  "samples": [
+    {
+      "id": "reference",
+      "role": "reference",
+      "description": "Salmonella Typhimurium LT2 — canonical complete Typhimurium reference",
+      "source_type": "ncbi_assembly",
+      "accession": "GCF_000006945.2",
+      "files": {
+        "assembly": "assembly.fasta"
+      },
+      "download": {
+        "command": "datasets download genome accession GCF_000006945.2 --include genome --filename genome.zip && unzip -q genome.zip && cat ncbi_dataset/data/GCF_000006945.2/*.fna > assembly.fasta && rm -rf ncbi_dataset genome.zip README.md",
+        "tool": "ncbi-datasets-cli"
+      }
+    },
+    {
+      "id": "ingroup_1",
+      "role": "ingroup",
+      "description": "Salmonella Typhimurium PNUSAS576962 — PulseNet surveillance isolate at normal coverage (PRJNA230403)",
+      "source_type": "sra",
+      "accession": "SRR38945246",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR38945246 && mv SRR38945246_1.fastq.gz reads_1.fq.gz && mv SRR38945246_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    },
+    {
+      "id": "ingroup_2",
+      "role": "ingroup",
+      "description": "Salmonella Typhimurium PNUSAS577744 — PulseNet surveillance isolate at normal coverage (PRJNA230403)",
+      "source_type": "sra",
+      "accession": "SRR38944463",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR38944463 && mv SRR38944463_1.fastq.gz reads_1.fq.gz && mv SRR38944463_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    },
+    {
+      "id": "low_cov_outlier",
+      "role": "outlier",
+      "description": "Salmonella Typhimurium PNUSAS578491 downsampled to ~5x coverage using seqtk — simulates a failed library or low-input sample",
+      "source_type": "recipe",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "recipe": {
+        "description": "Downsample SRR38944085 (PNUSAS578491, ~50x) to ~5x by taking 10% of reads using seqtk. Uses seed 42 for reproducibility.",
+        "inputs": ["ingroup_source"],
+        "tools_required": ["seqtk"],
+        "command": "seqtk sample -s42 ../ingroup_source/reads_1.fq.gz 0.10 | gzip > reads_1.fq.gz && seqtk sample -s42 ../ingroup_source/reads_2.fq.gz 0.10 | gzip > reads_2.fq.gz"
+      },
+      "download": {
+        "command": "echo 'low_cov_outlier is recipe-based; run acquire.py which will generate it from ingroup_source'",
+        "tool": "seqtk"
+      }
+    },
+    {
+      "id": "ingroup_source",
+      "role": "ingroup",
+      "description": "Salmonella Typhimurium PNUSAS578491 — source reads for low_cov_outlier recipe; also used as a normal-coverage ingroup sample",
+      "source_type": "sra",
+      "accession": "SRR38944085",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR38944085 && mv SRR38944085_1.fastq.gz reads_1.fq.gz && mv SRR38944085_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    }
+  ],
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "The low-coverage outlier is produced from the same strain as ingroup_source, so the 'true' SNP distance to the outlier is known (0 SNPs from ingroup_source). This makes the underestimation artifact clearly measurable: the pipeline will report the low-coverage sample as closer to some samples and farther from others solely due to missing data patterns, not biology."
+  }
+}

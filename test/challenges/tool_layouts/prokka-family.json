@@ -1,0 +1,12 @@
+{
+  "tool_family": "prokka-family",
+  "description": "Prokka / Bakta: single FASTA assembly for annotation",
+  "invocation_hint": "prokka --outdir prokka_output/ --prefix sample assembly.fasta",
+  "layout": [
+    {
+      "source_role": "subject",
+      "source_file": "assembly",
+      "target": "assembly.fasta"
+    }
+  ]
+}

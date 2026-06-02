@@ -1,0 +1,12 @@
+{
+  "tool_family": "sistr",
+  "description": "SISTR: single FASTA assembly input",
+  "invocation_hint": "sistr -i assembly.fasta -f tab -o sistr_results",
+  "layout": [
+    {
+      "source_role": "subject",
+      "source_file": "assembly",
+      "target": "assembly.fasta"
+    }
+  ]
+}

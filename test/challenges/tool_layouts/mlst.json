@@ -1,0 +1,12 @@
+{
+  "tool_family": "mlst",
+  "description": "mlst (tseemann): one or more FASTA assemblies",
+  "invocation_hint": "mlst *.fasta",
+  "layout": [
+    {
+      "source_roles": ["subject", "ingroup", "outlier"],
+      "source_file": "assembly",
+      "target": "{sample_id}.fasta"
+    }
+  ]
+}

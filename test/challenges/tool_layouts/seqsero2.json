@@ -1,0 +1,12 @@
+{
+  "tool_family": "seqsero2",
+  "description": "SeqSero2 assembly mode: single FASTA input",
+  "invocation_hint": "seqsero2 -m k -t 4 -i assembly.fasta",
+  "layout": [
+    {
+      "source_role": "subject",
+      "source_file": "assembly",
+      "target": "assembly.fasta"
+    }
+  ]
+}

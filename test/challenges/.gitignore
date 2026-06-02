@@ -1,0 +1,5 @@
+# Downloaded sequence data — never commit
+**/data/
+
+# Tool layout working directories — generated, not committed
+**/layouts/

@@ -1,0 +1,17 @@
+{
+  "tool_family": "spades-family",
+  "description": "SPAdes / Unicycler: paired reads for a single sample assembly",
+  "invocation_hint": "spades.py -1 reads_1.fq.gz -2 reads_2.fq.gz -o spades_output/",
+  "layout": [
+    {
+      "source_role": "subject",
+      "source_file": "reads_1",
+      "target": "reads_1.fq.gz"
+    },
+    {
+      "source_role": "subject",
+      "source_file": "reads_2",
+      "target": "reads_2.fq.gz"
+    }
+  ]
+}

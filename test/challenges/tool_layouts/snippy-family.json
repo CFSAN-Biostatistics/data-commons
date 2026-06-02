@@ -1,0 +1,22 @@
+{
+  "tool_family": "snippy-family",
+  "description": "snippy + snippy-core: reference FASTA plus per-sample paired-read directories",
+  "invocation_hint": "for dir in samples/*/; do name=$(basename $dir); snippy --ref reference.fasta --R1 $dir/reads_1.fq.gz --R2 $dir/reads_2.fq.gz --outdir ${name}_snps; done && snippy-core --ref reference.fasta *_snps/",
+  "layout": [
+    {
+      "source_role": "reference",
+      "source_file": "assembly",
+      "target": "reference.fasta"
+    },
+    {
+      "source_roles": ["ingroup", "outlier", "subject"],
+      "source_file": "reads_1",
+      "target": "samples/{sample_id}/reads_1.fq.gz"
+    },
+    {
+      "source_roles": ["ingroup", "outlier", "subject"],
+      "source_file": "reads_2",
+      "target": "samples/{sample_id}/reads_2.fq.gz"
+    }
+  ]
+}

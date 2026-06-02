@@ -1,0 +1,22 @@
+{
+  "tool_family": "cfsan-snp-pipeline",
+  "description": "CFSAN-SNP-Pipeline: reference FASTA plus samples/ directory with one subdir per sample containing paired reads",
+  "invocation_hint": "cfsan_snp_pipeline run reference.fasta samples/",
+  "layout": [
+    {
+      "source_role": "reference",
+      "source_file": "assembly",
+      "target": "reference.fasta"
+    },
+    {
+      "source_roles": ["ingroup", "outlier", "subject"],
+      "source_file": "reads_1",
+      "target": "samples/{sample_id}/{sample_id}_1.fastq.gz"
+    },
+    {
+      "source_roles": ["ingroup", "outlier", "subject"],
+      "source_file": "reads_2",
+      "target": "samples/{sample_id}/{sample_id}_2.fastq.gz"
+    }
+  ]
+}

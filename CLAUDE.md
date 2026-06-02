@@ -15,7 +15,8 @@ Test data library for bioinformatics tool validation. Provides known input/outpu
 
 ```
 test/
-├── compression/      # File compression format examples (gz, zst, tar.gz)
+├── challenges/      # Adversarial stimulus library (see below)
+├── compression/     # File compression format examples (gz, zst, tar.gz)
 ├── csp2/            # Submodule from CFSAN-Biostatistics/CSP2_TestData
 ├── identify/        # Sample accession ID parsing tests
 ├── reference_selection/  # Assembly collections for reference chooser tools
@@ -153,6 +154,21 @@ Discovery script uses modular Python libraries in `scripts/lib/`:
 - `metadata_parser.py` - Extract serotype/ST from messy NCBI metadata
 - `confidence_scorer.py` - Score candidate quality
 - `manifest_builder.py` - Generate manifest.json files
+
+## Challenge Dataset Library (test/challenges/)
+
+A **stimulus library** — datasets with characteristics that target known failure modes in major bioinformatics tool categories. Distinct from `test/typing/` in a fundamental way: challenges encode the *pathological condition*, not expected tool behavior. There is no ground truth and no pass/fail assertion. The purpose is to provide adversarial inputs that expose tool assumptions.
+
+**Key design decisions:**
+- Phenomenon-first organization: challenges are grouped by biological/technical phenomenon (`contamination/`, `wrong_organism/`, `extreme_gc/`, etc.), not by tool
+- Each challenge has a `manifest.json` with sample roles, mechanism description, and download instructions — no bulk data committed
+- Multi-sample challenges use explicit roles: `reference`, `ingroup`, `outlier`, `contaminant`, `subject`
+- Layout templates (`tool_layouts/`) render symlink trees so downloaded data appears in the directory structure each tool family expects
+- `acquire.py` handles download; `layout.py --challenge X --tool Y --out /path` renders a working layout
+
+**Priority for new challenges:** in-silico typing & SNP pipelines → assembly → alignment
+
+See `test/challenges/README.md` for full documentation, `MANIFEST_SCHEMA.md` for the manifest field reference, and `FAILURE_MODES.md` for the research catalog of known failure modes across all tool categories.
 
 ## Legacy Test Data (test/taxonomy/, test/resistance/)
 

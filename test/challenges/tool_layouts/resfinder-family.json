@@ -1,0 +1,12 @@
+{
+  "tool_family": "resfinder-family",
+  "description": "ResFinder / AMRFinderPlus / abricate: single FASTA assembly",
+  "invocation_hint": "abricate --db resfinder assembly.fasta",
+  "layout": [
+    {
+      "source_role": "subject",
+      "source_file": "assembly",
+      "target": "assembly.fasta"
+    }
+  ]
+}

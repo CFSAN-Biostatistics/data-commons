@@ -1,0 +1,45 @@
+{
+  "name": "ecoli_to_seqsero2",
+  "phenomenon": "wrong_organism",
+  "challenge_tags": [
+    "wrong_organism",
+    "in_silico_typing",
+    "confident_wrong_call",
+    "silent_wrong_output"
+  ],
+  "mechanism": "SeqSero2 has no organism guard — it searches any input assembly for Salmonella antigen genes without first verifying the organism is Salmonella. When E. coli K-12 is submitted, SeqSero2 finds partial matches via conserved housekeeping k-mers shared between E. coli and Salmonella, and returns a confident (wrong) serotype call. The tool exits 0 with a populated result table. There is no warning, no rejection, and no confidence flag indicating the prediction is unreliable. A naive user sees a Salmonella serotype and may accept it.",
+  "tool_categories": ["in_silico_typing"],
+  "tool_families": ["seqsero2", "sistr"],
+  "known_behaviors": [
+    {
+      "tool": "SeqSero2",
+      "behavior": "Returns a Salmonella serotype prediction with exit code 0. The predicted serotype is wrong. No warning or rejection is emitted. The result TSV is populated as if the input were a valid Salmonella assembly."
+    },
+    {
+      "tool": "SISTR",
+      "behavior": "Returns a serovar prediction with low cgMLST confidence score, but still outputs a named serovar rather than rejecting the input. The prediction_status field may indicate 'novel' or low confidence but the tool does not refuse to type."
+    }
+  ],
+  "samples": [
+    {
+      "id": "ecoli_k12",
+      "role": "subject",
+      "description": "E. coli K-12 MG1655 reference assembly — canonical lab strain, well-characterized, zero Salmonella biology",
+      "source_type": "ncbi_assembly",
+      "accession": "GCF_000005845.2",
+      "files": {
+        "assembly": "assembly.fasta"
+      },
+      "download": {
+        "command": "datasets download genome accession GCF_000005845.2 --include genome --filename genome.zip && unzip -q genome.zip && mv ncbi_dataset/data/GCF_000005845.2/GCF_000005845.2_ASM584v2_genomic.fna assembly.fasta && rm -rf ncbi_dataset genome.zip README.md",
+        "tool": "ncbi-datasets-cli"
+      }
+    }
+  ],
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "E. coli K-12 MG1655 (GCF_000005845.2) is the canonical E. coli reference genome. It is maximally distant from Salmonella among common lab organisms while still being in the same family (Enterobacteriaceae), making it the cleanest demonstration of the wrong-organism failure mode. The shared Enterobacteriaceae housekeeping genes are what produce partial k-mer matches in SeqSero2."
+  }
+}

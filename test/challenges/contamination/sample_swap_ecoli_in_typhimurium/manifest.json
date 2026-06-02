@@ -1,0 +1,106 @@
+{
+  "name": "sample_swap_ecoli_in_typhimurium",
+  "phenomenon": "contamination",
+  "challenge_tags": [
+    "contamination",
+    "sample_swap",
+    "population_variant_analysis",
+    "silent_wrong_output",
+    "core_genome_collapse"
+  ],
+  "mechanism": "A cohort of three closely related Salmonella Typhimurium isolates from PulseNet surveillance (PRJNA230403) is assembled with one E. coli K-12 sample in the outlier role. SNP pipelines like snippy assume all samples in a cohort are sufficiently closely related to the reference genome. The E. coli sample aligns poorly to the Typhimurium LT2 reference: most positions have no coverage or fail quality filters. snippy-core computes the core genome as the intersection of positions called in all samples — the E. coli sample forces this intersection to near-zero. The pipeline reports 0 core SNPs and exits 0 with no error or warning about the outlier. A user sees an empty phylogeny with no indication that one sample caused it.",
+  "tool_categories": ["population_variant_analysis"],
+  "tool_families": ["snippy-family", "cfsan-snp-pipeline"],
+  "known_behaviors": [
+    {
+      "tool": "snippy-core",
+      "behavior": "Reports 0 core SNPs. Produces a valid core.aln file containing only the reference sequence. Exits 0. The only signal of failure is the 0-SNP count, which may be dismissed as 'clonal outbreak' rather than a pipeline error."
+    },
+    {
+      "tool": "Gubbins",
+      "behavior": "If run on the snippy-core alignment, may either crash (alignment too short / no variable sites) or classify the outlier as massively recombinant, distorting r/m estimates for the entire cohort."
+    }
+  ],
+  "samples": [
+    {
+      "id": "reference",
+      "role": "reference",
+      "description": "Salmonella Typhimurium LT2 — canonical complete reference genome for Typhimurium SNP analysis",
+      "source_type": "ncbi_assembly",
+      "accession": "GCF_000006945.2",
+      "files": {
+        "assembly": "assembly.fasta"
+      },
+      "download": {
+        "command": "datasets download genome accession GCF_000006945.2 --include genome --filename genome.zip && unzip -q genome.zip && cat ncbi_dataset/data/GCF_000006945.2/*.fna > assembly.fasta && rm -rf ncbi_dataset genome.zip README.md",
+        "tool": "ncbi-datasets-cli"
+      }
+    },
+    {
+      "id": "ingroup_1",
+      "role": "ingroup",
+      "description": "Salmonella Typhimurium PNUSAS576962 — PulseNet surveillance isolate (PRJNA230403)",
+      "source_type": "sra",
+      "accession": "SRR38945246",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR38945246 && mv SRR38945246_1.fastq.gz reads_1.fq.gz && mv SRR38945246_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    },
+    {
+      "id": "ingroup_2",
+      "role": "ingroup",
+      "description": "Salmonella Typhimurium PNUSAS577744 — PulseNet surveillance isolate (PRJNA230403)",
+      "source_type": "sra",
+      "accession": "SRR38944463",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR38944463 && mv SRR38944463_1.fastq.gz reads_1.fq.gz && mv SRR38944463_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    },
+    {
+      "id": "ingroup_3",
+      "role": "ingroup",
+      "description": "Salmonella Typhimurium PNUSAS578491 — PulseNet surveillance isolate (PRJNA230403)",
+      "source_type": "sra",
+      "accession": "SRR38944085",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR38944085 && mv SRR38944085_1.fastq.gz reads_1.fq.gz && mv SRR38944085_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    },
+    {
+      "id": "outlier",
+      "role": "outlier",
+      "description": "Escherichia coli K-12 MG1655 — the swapped sample; completely wrong organism for a Typhimurium cohort",
+      "source_type": "sra",
+      "accession": "SRR1770413",
+      "files": {
+        "reads_1": "reads_1.fq.gz",
+        "reads_2": "reads_2.fq.gz"
+      },
+      "download": {
+        "command": "fasterq-dump --gzip --outdir . SRR1770413 && mv SRR1770413_1.fastq.gz reads_1.fq.gz && mv SRR1770413_2.fastq.gz reads_2.fq.gz",
+        "tool": "sra-tools"
+      }
+    }
+  ],
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-02",
+    "confidence": "high",
+    "notes": "Ingroup samples are PulseNet surveillance Typhimurium from PRJNA230403, verified serovar=Typhimurium in BioSample metadata. Outlier is E. coli K-12 MG1655 from PRJNA272917, confirmed PAIRED Illumina layout. Reference is the canonical LT2 complete genome. The core genome collapse is deterministic: E. coli reads will not align to LT2 at the coverage/quality thresholds used by snippy, guaranteeing 0 core SNPs when all 5 samples are run together."
+  }
+}

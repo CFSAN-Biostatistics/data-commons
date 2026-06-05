@@ -84,7 +84,7 @@ fi
 # Find test case directories
 find_test_cases() {
     if $ALL_CASES; then
-        find "$SCRIPT_DIR" -mindepth 1 -maxdepth 1 -type d -name "*_*" | grep -v "^$SCRIPT_DIR/\(scripts\|config\|examples\)$"
+        find "$SCRIPT_DIR" -mindepth 1 -maxdepth 1 -type d -name "sal_*"
     elif [[ -n "$ORGANISM" ]]; then
         find "$SCRIPT_DIR" -mindepth 1 -maxdepth 1 -type d -name "${ORGANISM}_*"
     elif [[ -n "$CASE" ]]; then

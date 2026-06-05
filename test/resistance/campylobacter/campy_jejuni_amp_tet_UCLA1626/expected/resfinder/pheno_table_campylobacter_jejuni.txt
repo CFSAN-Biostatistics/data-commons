@@ -1,0 +1,24 @@
+# ResFinder phenotype results for campylobacter jejuni.
+# Sample: UCLA_1626.fa
+# 
+# The phenotype 'No resistance' should be interpreted with
+# caution, as it only means that nothing in the used
+# database indicate resistance, but resistance could exist
+# from 'unknown' or not yet implemented sources.
+# 
+# The 'Match' column stores one of the integers 0, 1, 2, 3.
+#      0: No match found
+#      1: Match < 100% ID AND match length < ref length
+#      2: Match < 100% ID AND match length = ref length
+#      3: Match = 100% ID AND match length = ref length
+# If several hits causing the same resistance are found,
+# the highest number will be stored in the 'Match' column.
+
+# Antimicrobial	Class	WGS-predicted phenotype	Match	Genetic background
+gentamicin	aminoglycoside	No resistance	0	
+ciprofloxacin	quinolone	No resistance	0	
+streptomycin	aminoglycoside	No resistance	0	
+ampicillin	beta-lactam	Resistant	2	blaOXA-61 (blaOXA-61_AY587956)
+nalidixic acid	quinolone	No resistance	0	
+tetracycline	tetracycline	Resistant	3	tet(O) (tet(O)_M18896)
+erythromycin	macrolide	No resistance	0	

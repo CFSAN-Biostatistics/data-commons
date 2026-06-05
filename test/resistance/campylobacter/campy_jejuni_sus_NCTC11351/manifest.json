@@ -1,0 +1,89 @@
+{
+  "organism": "Campylobacter jejuni",
+  "strain": "NCTC11351",
+  "curation": {
+    "date": "2026-06-05",
+    "ncbi_accessions": {
+      "biosample": null,
+      "sra": null,
+      "assembly": "NCTC11351"
+    },
+    "metadata_confidence": "high",
+    "amr_evidence": [
+      {
+        "source": "ResFinder_v4.6.0",
+        "genes": [],
+        "phenotypes_resistant": [],
+        "note": "No resistance genes detected"
+      }
+    ],
+    "phenotypic_mic_data": null,
+    "quality_metrics": {
+      "has_reads": false,
+      "has_assembly": true,
+      "submitter": "NCTC",
+      "notes": "NCTC type strain reference assembly"
+    }
+  },
+  "ground_truth": {
+    "amr": {
+      "phenotype_summary": "susceptible",
+      "resistant_phenotypes": {},
+      "susceptible_phenotypes": [
+        "ampicillin", "tetracycline", "ciprofloxacin",
+        "erythromycin", "gentamicin", "nalidixic acid"
+      ],
+      "detected_genes": [],
+      "amr_database_evidence": {
+        "source": "ResFinder v4.6.0 (ResFinder-2.4.0 DB)",
+        "note": "No acquired resistance genes detected by ResFinder. Used as fully susceptible control."
+      }
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": null,
+      "download_cmd": null
+    },
+    "assembly": {
+      "accession": "NCTC11351",
+      "download_cmd": null,
+      "note": "Assembly pre-loaded in data/contigs.fa"
+    }
+  },
+  "tools": {
+    "ResFinder": {
+      "input_type": "assembly",
+      "version_min": "4.6.0",
+      "run_cmd": "python -m resfinder -ifa data/contigs.fa -o actual/resfinder -j actual/resfinder/resfinder.json -s 'Campylobacter jejuni' -acq",
+      "reference_output": "expected/resfinder/resfinder.json"
+    },
+    "AMRFinderPlus": {
+      "input_type": "assembly",
+      "version_min": "3.12.0",
+      "run_cmd": "mkdir -p actual/amrfinderplus && amrfinder --nucleotide data/contigs.fa --organism Campylobacter --output actual/amrfinderplus/amrfinder.tsv --plus",
+      "reference_output": "expected/amrfinderplus/amrfinder.tsv"
+    },
+    "CARD_RGI": {
+      "input_type": "assembly",
+      "version_min": "6.0.0",
+      "run_cmd": "mkdir -p actual/card_rgi && rgi main --input_sequence data/contigs.fa --output_file actual/card_rgi/rgi --input_type contig --clean",
+      "reference_output": "expected/card_rgi/rgi.json"
+    },
+    "abricate": {
+      "input_type": "assembly",
+      "version_min": "1.0.0",
+      "run_cmd": "mkdir -p actual/abricate && abricate --db resfinder data/contigs.fa > actual/abricate/abricate_resfinder.tsv && abricate --db card data/contigs.fa > actual/abricate/abricate_card.tsv",
+      "reference_output": "expected/abricate/abricate_resfinder.tsv"
+    }
+  },
+  "validation_instructions": {
+    "resfinder": "No resistance genes expected. PASS if all phenotypes show amr_resistant=false in resfinder.json and seq_regions is empty. FAIL if any drug flagged as resistant.",
+    "amrfinderplus": "No AMR hits expected. PASS if output TSV contains only the header line. FAIL if any gene row present.",
+    "card_rgi": "No high-confidence CARD hits expected (identity >= 95%, bitscore strict). PARTIAL if sub-threshold hits present. FAIL if any Perfect or Strict hits found.",
+    "abricate": "No hits expected at default thresholds (min-id 80, min-cov 80). PASS if TSV contains only the header line. FAIL if any gene row present."
+  },
+  "difficulty": "common",
+  "case_category": "susceptible_control",
+  "notes": "Campylobacter jejuni NCTC11351 type strain. Fully susceptible reference. Use for specificity testing — any resistance call is a false positive."
+}

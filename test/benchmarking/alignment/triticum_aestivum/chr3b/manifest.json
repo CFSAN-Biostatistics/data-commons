@@ -1,0 +1,39 @@
+{
+  "id": "T8a",
+  "name": "chr3b",
+  "organism": "Triticum aestivum",
+  "strain_assembly": "Chinese Spring IWGSC RefSeq v2.1 — chromosome 3B",
+  "target_type": "real_genome",
+  "tier": 1,
+  "key_challenge": "Cross-subgenome homeolog ambiguity (~95% identity between A/B/D subgenomes), highly repetitive",
+  "size_approx": "830 Mb - 1 Gb",
+  "ploidy": "hexaploid_single_chr",
+  "reference": {
+    "assembly": "IWGSC RefSeq v2.1",
+    "bioproject": "PRJNA669381",
+    "chromosome": "3B",
+    "source_url": "https://wheat-urgi.versailles.inra.fr/Seq-Repository/Assemblies",
+    "v1_genbank": "GCA_900519105.1",
+    "notes": "VERIFY: confirm v2.1 chromosome 3B URL at URGI before download. v1.0 GenBank accession GCA_900519105.1 is provided as fallback but v2.1 is the current standard. chr3B is the recommended contained option — keeps homeolog ambiguity tractable without requiring the full 17 Gb hexaploid.",
+    "download": {
+      "tool": "wget",
+      "command": "wget -q 'https://wheat-urgi.versailles.inra.fr/Seq-Repository/Assemblies' -O index.html && grep -oP 'href=\"[^\"]*3B[^\"]*\\.fa\\.gz\"' index.html | head -1 | grep -oP '(?<=href=\")[^\"]+' | xargs wget -q -O chr3B.fa.gz && gunzip chr3B.fa.gz && mv chr3B.fa reference.fasta && rm -f index.html"
+    }
+  },
+  "simulation": {
+    "tool": "art_illumina",
+    "command": "art_illumina -ss HS25 -i ../reference/reference.fasta -p -l 150 -f 10 -rs {rng_seed} -o reads && gzip reads1.fq reads2.fq && mv reads1.fq.gz reads_1.fastq.gz && mv reads2.fq.gz reads_2.fastq.gz",
+    "read_length_bp": 150,
+    "coverage_x": 10,
+    "notes": "Lower coverage for large chromosome. art_illumina used for HiSeq platform error model (HS25). Map reads against full hexaploid reference if available to capture homeolog mismapping."
+  },
+  "truth": {
+    "simulated": "art_illumina read name encodes true origin; parse with custom comparator or paftools.js mapeval"
+  },
+  "benchmark_notes": "Homeologous subgenomes (A, B, D) share ~95% identity — reads from one subgenome frequently seed to another. This is the core polyploid stressor. Map against full hexaploid reference (all 3 subgenomes) for maximum diagnostic value.",
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-03",
+    "notes": "VERIFY download URL at URGI before acquisition. The wget command above may need updating if URGI restructures their file listing."
+  }
+}

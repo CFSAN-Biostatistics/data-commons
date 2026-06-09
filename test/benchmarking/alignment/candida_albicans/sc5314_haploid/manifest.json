@@ -1,0 +1,35 @@
+{
+  "id": "T7a",
+  "name": "sc5314_haploid",
+  "organism": "Candida albicans",
+  "strain_assembly": "SC5314 Assembly 22 (haploid representation)",
+  "target_type": "real_genome",
+  "tier": 1,
+  "key_challenge": "Paralog gene families, heterozygosity baseline (simpler haploid control)",
+  "size_approx": "14.3 Mb",
+  "ploidy": "haploid_representation",
+  "reference": {
+    "refseq": "GCF_000182965.3",
+    "genbank": "GCA_000182965.3",
+    "assembly_name": "ASM18296v3",
+    "notes": "Haploid representation for baseline comparison. Use sc5314_diploid for heterozygosity and LOH testing.",
+    "download": {
+      "tool": "ncbi-datasets-cli",
+      "command": "datasets download genome accession GCF_000182965.3 --include genome --filename ncbi_dataset.zip && unzip -o ncbi_dataset.zip && cat ncbi_dataset/data/GCF_000182965.3/*.fna > reference.fasta && rm -rf ncbi_dataset ncbi_dataset.zip"
+    }
+  },
+  "simulation": {
+    "tool": "dwgsim",
+    "command": "dwgsim -1 150 -2 150 -C 50 -z {rng_seed} ../reference/reference.fasta reads && mv reads.bwa.read1.fastq.gz reads_1.fastq.gz && mv reads.bwa.read2.fastq.gz reads_2.fastq.gz",
+    "read_length_bp": 150,
+    "coverage_x": 50
+  },
+  "truth": {
+    "simulated": "dwgsim read name encodes true origin coordinates; evaluate with paftools.js mapeval"
+  },
+  "benchmark_notes": "Use alongside sc5314_diploid to isolate the contribution of heterozygosity to aligner behavior. 8 chromosome pairs.",
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-03"
+  }
+}

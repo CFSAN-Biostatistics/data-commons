@@ -1,0 +1,35 @@
+{
+  "id": "T8c",
+  "name": "aegilops_tauschii_aet_v4",
+  "organism": "Aegilops tauschii",
+  "strain_assembly": "AL8/78 Aet v4.0",
+  "target_type": "real_genome",
+  "tier": 1,
+  "key_challenge": "Wheat D-genome donor — wheat-like repeat landscape without hexaploidy, diploid tractable alternative to T8a/T8b",
+  "size_approx": "4.3 Gb",
+  "ploidy": "diploid",
+  "reference": {
+    "genbank": "GCA_002575655.1",
+    "assembly_name": "Aet v4.0",
+    "notes": "VERIFY: Aet v5.0 and v6.0 exist at NCBI. Confirm you want v4.0 (GCA_002575655.1) or update to the latest version deliberately. The D-subgenome is the closest diploid relative of the wheat D subgenome.",
+    "download": {
+      "tool": "ncbi-datasets-cli",
+      "command": "datasets download genome accession GCA_002575655.1 --include genome --filename ncbi_dataset.zip && unzip -o ncbi_dataset.zip && cat ncbi_dataset/data/GCA_002575655.1/*.fna > reference.fasta && rm -rf ncbi_dataset ncbi_dataset.zip"
+    }
+  },
+  "simulation": {
+    "tool": "art_illumina",
+    "command": "art_illumina -ss HS25 -i ../reference/reference.fasta -p -l 150 -f 10 -rs {rng_seed} -o reads && gzip reads1.fq reads2.fq && mv reads1.fq.gz reads_1.fastq.gz && mv reads2.fq.gz reads_2.fastq.gz",
+    "read_length_bp": 150,
+    "coverage_x": 10
+  },
+  "truth": {
+    "simulated": "art_illumina read name encodes true origin; parse with custom comparator or paftools.js mapeval"
+  },
+  "benchmark_notes": "Diploid tractable alternative to T8a/T8b. Use when the hexaploid scale of T8a/T8b is not required but wheat-like repeat content is. 4.3 Gb diploid (DD, 2n=2x=14).",
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-03",
+    "notes": "VERIFY assembly version before download — Aet v5.0 and v6.0 are available and may be preferable."
+  }
+}

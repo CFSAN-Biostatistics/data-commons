@@ -1,0 +1,36 @@
+{
+  "id": "T6",
+  "name": "630",
+  "organism": "Clostridioides difficile",
+  "strain_assembly": "630",
+  "target_type": "real_genome",
+  "tier": 1,
+  "key_challenge": "Mosaic genome with mobile genetic elements, moderate AT-bias (~71% AT)",
+  "size_approx": "4.29 Mb",
+  "gc_percent": 29.0,
+  "ploidy": "haploid",
+  "reference": {
+    "genbank": "AM180355.1",
+    "refseq": "NC_009089.1",
+    "resequenced_alt": "CP010905.2",
+    "notes": "AM180355.1/NC_009089.1 is the canonical 630 reference. CP010905.2 is a SMRT-resequenced version that resolves some mobile elements — choose one and be consistent across the benchmark run.",
+    "download": {
+      "tool": "entrez-direct",
+      "command": "efetch -db nucleotide -id NC_009089.1 -format fasta > reference.fasta"
+    }
+  },
+  "simulation": {
+    "tool": "dwgsim",
+    "command": "dwgsim -1 150 -2 150 -C 100 -z {rng_seed} ../reference/reference.fasta reads && mv reads.bwa.read1.fastq.gz reads_1.fastq.gz && mv reads.bwa.read2.fastq.gz reads_2.fastq.gz",
+    "read_length_bp": 150,
+    "coverage_x": 100
+  },
+  "truth": {
+    "simulated": "dwgsim read name encodes true origin coordinates; evaluate with paftools.js mapeval"
+  },
+  "benchmark_notes": "Mobile elements (Tn916-family, CTn elements) create repeat-driven ambiguity. Real short reads available under ENA sample ERS550098 (630Δerm). Mosaic genome structure means aligner behavior varies substantially by region.",
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-03"
+  }
+}

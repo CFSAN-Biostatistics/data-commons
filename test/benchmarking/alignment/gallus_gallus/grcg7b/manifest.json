@@ -1,0 +1,37 @@
+{
+  "id": "T2",
+  "name": "grcg7b",
+  "organism": "Gallus gallus",
+  "strain_assembly": "bGalGal1.mat.broiler.GRCg7b",
+  "target_type": "real_genome",
+  "tier": 1,
+  "key_challenge": "ERV content (EAV-HP), macro/microchromosome size range stresses seed distribution",
+  "size_approx": "1.05 Gb",
+  "ploidy": "diploid",
+  "reference": {
+    "refseq": "GCF_016699485.2",
+    "genbank": "GCA_016699485.1",
+    "assembly_name": "bGalGal1.mat.broiler.GRCg7b",
+    "source": "Vertebrate Genomes Project, Jan 2021",
+    "scaffold_n50_mb": 90.9,
+    "chromosomes": 41,
+    "download": {
+      "tool": "ncbi-datasets-cli",
+      "command": "datasets download genome accession GCF_016699485.2 --include genome --filename ncbi_dataset.zip && unzip -o ncbi_dataset.zip && cat ncbi_dataset/data/GCF_016699485.2/*.fna > reference.fasta && rm -rf ncbi_dataset ncbi_dataset.zip"
+    }
+  },
+  "simulation": {
+    "tool": "dwgsim",
+    "command": "dwgsim -1 150 -2 150 -C 30 -z {rng_seed} ../reference/reference.fasta reads && mv reads.bwa.read1.fastq.gz reads_1.fastq.gz && mv reads.bwa.read2.fastq.gz reads_2.fastq.gz",
+    "read_length_bp": 150,
+    "coverage_x": 30
+  },
+  "truth": {
+    "simulated": "dwgsim read name encodes true origin coordinates; evaluate with paftools.js mapeval"
+  },
+  "benchmark_notes": "ERV content and macro/microchromosome size range (~1 Mb to ~200 Mb) stress k-mer seed distribution differently across chromosomes. Partition accuracy by chromosome size class.",
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-03"
+  }
+}

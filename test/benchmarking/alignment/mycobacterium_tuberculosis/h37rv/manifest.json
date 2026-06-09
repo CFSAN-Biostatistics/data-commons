@@ -1,0 +1,37 @@
+{
+  "id": "T3",
+  "name": "h37rv",
+  "organism": "Mycobacterium tuberculosis",
+  "strain_assembly": "H37Rv",
+  "target_type": "real_genome",
+  "tier": 1,
+  "key_challenge": "Very high GC (~65.6%), PE/PPE and PE_PGRS repeat gene families",
+  "size_approx": "4.41 Mb",
+  "length_bp": 4411532,
+  "gc_percent": 65.6,
+  "ploidy": "haploid",
+  "reference": {
+    "refseq": "NC_000962.3",
+    "genbank": "AL123456.3",
+    "assembly": "GCA_000195955.2",
+    "download": {
+      "tool": "entrez-direct",
+      "command": "efetch -db nucleotide -id NC_000962.3 -format fasta > reference.fasta"
+    }
+  },
+  "simulation": {
+    "tool": "dwgsim",
+    "command": "dwgsim -1 150 -2 150 -C 100 -z {rng_seed} ../reference/reference.fasta reads && mv reads.bwa.read1.fastq.gz reads_1.fastq.gz && mv reads.bwa.read2.fastq.gz reads_2.fastq.gz",
+    "read_length_bp": 150,
+    "coverage_x": 100,
+    "notes": "Higher coverage for small genome. GC-bias error model in dwgsim is relevant here."
+  },
+  "truth": {
+    "simulated": "dwgsim read name encodes true origin coordinates; evaluate with paftools.js mapeval"
+  },
+  "benchmark_notes": "Partition accuracy by PE/PPE vs. non-PE/PPE regions for full diagnostic value. PE_PGRS families (tandem repeat-containing) are the primary repeat stress. Aligner divergence in PE/PPE loci is expected and informative.",
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-03"
+  }
+}

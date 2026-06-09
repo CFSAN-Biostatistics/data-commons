@@ -1,0 +1,37 @@
+{
+  "id": "T4",
+  "name": "mrsa252",
+  "organism": "Staphylococcus aureus",
+  "strain_assembly": "MRSA252 (ST36 / EMRSA-16)",
+  "target_type": "real_genome",
+  "tier": 1,
+  "key_challenge": "Mobile genetic elements, low GC (~32.8%), pathogenicity islands",
+  "size_approx": "2.90 Mb",
+  "length_bp": 2902619,
+  "gc_percent": 32.8,
+  "ploidy": "haploid",
+  "reference": {
+    "genbank": "BX571856",
+    "refseq": "NC_002952.2",
+    "assembly": "GCF_000011505.1",
+    "topology": "circular",
+    "download": {
+      "tool": "entrez-direct",
+      "command": "efetch -db nucleotide -id NC_002952.2 -format fasta > reference.fasta"
+    }
+  },
+  "simulation": {
+    "tool": "dwgsim",
+    "command": "dwgsim -1 150 -2 150 -C 100 -z {rng_seed} ../reference/reference.fasta reads && mv reads.bwa.read1.fastq.gz reads_1.fastq.gz && mv reads.bwa.read2.fastq.gz reads_2.fastq.gz",
+    "read_length_bp": 150,
+    "coverage_x": 100
+  },
+  "truth": {
+    "simulated": "dwgsim read name encodes true origin coordinates; evaluate with paftools.js mapeval"
+  },
+  "benchmark_notes": "Low GC and mobile elements (IS256, pathogenicity islands) create alignment ambiguity. Circular chromosome — confirm aligner handles linearized FASTA correctly or circularize before simulation.",
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-03"
+  }
+}

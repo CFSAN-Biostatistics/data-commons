@@ -1,0 +1,41 @@
+{
+  "id": "S2",
+  "name": "ancient_dna",
+  "target_type": "synthetic",
+  "tier": 2,
+  "failure_mode": "short_damaged_read_sensitivity_mapq_calibration",
+  "headline_stat": "mapped fraction vs. fragment length; whether damage-induced mismatches inflate MAPQ penalties",
+  "base_reference": "T1",
+  "construction": {
+    "description": "No synthetic reference — uses human chr1 (T1) unchanged. Simulated reads use gargammel to produce authentic aDNA damage characteristics: C→T deamination at 5' ends, G→A at 3' ends (Briggs model), short fragment length distribution 30-80 bp.",
+    "requires_base_reference": "homo_sapiens/chr1/data/reference/reference.fasta",
+    "tools_required": []
+  },
+  "simulation": {
+    "tool": "gargammel",
+    "tools_required": ["gargammel", "mapDamage"],
+    "parameters": {
+      "fragment_length_modes_bp": [35, 50, 70],
+      "damage_levels": ["low", "medium", "high"],
+      "damage_model": "briggs"
+    },
+    "command": "gargammel --comp 0,0,1 -f ../../../homo_sapiens/chr1/data/reference/reference.fasta -o reads -s {rng_seed} --rl 35 --damage-high 0.01,0.7,0.01,0.7 && mv reads_s.fq.gz reads_1.fastq.gz",
+    "notes": "Command shown is illustrative for one parameter combination (35bp, high damage). acquire.py will run gargammel once per (fragment_length, damage_level) combination. See AGENTS.md for the full parameter sweep protocol. Single-end reads typical for aDNA."
+  },
+  "sweep": {
+    "parameters": {
+      "fragment_length_mode_bp": [35, 50, 70],
+      "damage_level": ["low", "medium", "high"]
+    },
+    "notes": "9 combinations total (3 lengths x 3 damage levels). Report mapped fraction and positional accuracy for each combination."
+  },
+  "truth": {
+    "type": "simulated_coordinates",
+    "format": "gargammel_read_names",
+    "eval_notes": "Validate damage profile with mapDamage2 before scoring alignments. Mapped fraction vs. fragment length is the primary diagnostic; MAPQ calibration for damaged reads is secondary."
+  },
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-03"
+  }
+}

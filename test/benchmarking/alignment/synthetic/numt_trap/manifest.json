@@ -1,0 +1,52 @@
+{
+  "id": "S4",
+  "name": "numt_trap",
+  "target_type": "synthetic",
+  "tier": 2,
+  "failure_mode": "mitochondrial_reads_misrouted_to_nuclear_numt_insertions",
+  "headline_stat": "fraction of mito-origin reads correctly placed on mito contig vs. captured by NUMTs, stratified by NUMT identity",
+  "base_reference": "T1",
+  "construction": {
+    "tool": "biopython",
+    "description": "Take a nuclear scaffold slice (chr1 slice) and embed 50-200 NUMT fragments copied from the human mitochondrial reference (rCRS NC_012920.1), each degraded to a target identity (60-99%), at random positions. Keep the true mito chromosome in the reference. Spike a high-coverage (~1000x) mito read set into a normal-coverage nuclear background.",
+    "parameters": {
+      "numt_count": 100,
+      "numt_identity_percent_range": [60, 99],
+      "numt_length_range_bp": [100, 5000],
+      "mito_coverage_x": 1000,
+      "nuclear_coverage_x": 30
+    },
+    "requires_references": [
+      "homo_sapiens/chr1/data/reference/reference.fasta",
+      "mito"
+    ],
+    "mito_refseq": "NC_012920.1",
+    "tools_required": ["python3", "biopython"],
+    "commands": [
+      "efetch -db nucleotide -id NC_012920.1 -format fasta > mito.fasta",
+      "python3 ../../../scripts/build_numt_trap.py --nuclear ../../../homo_sapiens/chr1/data/reference/reference.fasta --mito mito.fasta --numt-count 100 --identity-min 60 --identity-max 99 --seed {rng_seed} --out reference.fasta --truth-bed numt_truth.bed"
+    ],
+    "truth_outputs": ["numt_truth.bed", "mito.fasta"]
+  },
+  "simulation": {
+    "tool": "dwgsim",
+    "command": "dwgsim -1 150 -2 150 -C 30 -z {rng_seed} ../reference/reference.fasta nuclear_reads && dwgsim -1 150 -2 150 -C 1000 -z {rng_seed} ../reference/mito.fasta mito_reads && cat nuclear_reads.bwa.read1.fastq.gz mito_reads.bwa.read1.fastq.gz > reads_1.fastq.gz && cat nuclear_reads.bwa.read2.fastq.gz mito_reads.bwa.read2.fastq.gz > reads_2.fastq.gz",
+    "read_length_bp": 150,
+    "notes": "Nuclear reads at 30x; mito reads at 1000x spiked in. The read name encodes true origin (nuclear vs. mito) for evaluation."
+  },
+  "sweep": {
+    "parameter": "numt_identity_percent",
+    "values": [60, 70, 80, 90, 95, 99],
+    "notes": "NUMTs are embedded across the full identity range. Bin mito-origin reads by the identity of the NUMT they were captured by and report misrouting rate per bin."
+  },
+  "truth": {
+    "type": "origin_chromosome",
+    "format": "dwgsim_read_names_plus_truth_bed",
+    "truth_files": ["data/reference/numt_truth.bed"],
+    "eval_notes": "Mito-origin read classified as misrouted if it maps to a nuclear NUMT position (check against numt_truth.bed) rather than the mito contig. False mito-like coverage on nuclear NUMTs at each identity bin is the headline stat."
+  },
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-03"
+  }
+}

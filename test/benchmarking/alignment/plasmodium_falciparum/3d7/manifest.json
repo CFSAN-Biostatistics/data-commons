@@ -1,0 +1,37 @@
+{
+  "id": "T5",
+  "name": "3d7",
+  "organism": "Plasmodium falciparum",
+  "strain_assembly": "3D7",
+  "target_type": "real_genome",
+  "tier": 1,
+  "key_challenge": "Extreme AT-bias (~81% AT), subtelomeric var/rifin/stevor repeat families",
+  "size_approx": "23.3 Mb",
+  "chromosomes": 14,
+  "at_percent": 81.0,
+  "ploidy": "haploid",
+  "reference": {
+    "assembly_genbank": "GCA_000002765.3",
+    "assembly_refseq": "GCF_000002765.4",
+    "assembly_name": "ASM276v2",
+    "download": {
+      "tool": "ncbi-datasets-cli",
+      "command": "datasets download genome accession GCF_000002765.4 --include genome --filename ncbi_dataset.zip && unzip -o ncbi_dataset.zip && cat ncbi_dataset/data/GCF_000002765.4/*.fna > reference.fasta && rm -rf ncbi_dataset ncbi_dataset.zip"
+    }
+  },
+  "simulation": {
+    "tool": "dwgsim",
+    "command": "dwgsim -1 150 -2 150 -C 50 -z {rng_seed} ../reference/reference.fasta reads && mv reads.bwa.read1.fastq.gz reads_1.fastq.gz && mv reads.bwa.read2.fastq.gz reads_2.fastq.gz",
+    "read_length_bp": 150,
+    "coverage_x": 50,
+    "notes": "AT-bias breaks k-mer seeding assumptions in many aligners. dwgsim default error model may need GC-bias adjustment."
+  },
+  "truth": {
+    "simulated": "dwgsim read name encodes true origin coordinates; evaluate with paftools.js mapeval"
+  },
+  "benchmark_notes": "Partition accuracy by core chromosomal regions vs. subtelomeric var/rifin/stevor families. Multimapping in subtelomeric regions is expected; low MAPQ there is correct behavior. Real data available via MalariaGEN/Pf3k (ENA taxid 36329).",
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-03"
+  }
+}

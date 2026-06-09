@@ -1,0 +1,44 @@
+{
+  "id": "S1",
+  "name": "segmental_duplication",
+  "target_type": "synthetic",
+  "tier": 2,
+  "failure_mode": "confident_mismap_high_identity_paralogs",
+  "headline_stat": "fraction of reads with high MAPQ placed on wrong copy (confidently_wrong)",
+  "base_reference": "T1",
+  "construction": {
+    "tool": "simuG",
+    "description": "Build a ~25-50 Mb synthetic genome of N copies of a 1 Mb core block from human chr1, each mutated to a target pairwise identity via SNP/indel injection, separated by unique spacer sequences. Record per-copy identity labels for stratified accuracy scoring.",
+    "parameters": {
+      "copies": 20,
+      "identities_percent": [98.0, 99.0, 99.5, 99.9],
+      "core_block_mb": 1,
+      "spacer_kb": 75
+    },
+    "requires_base_reference": "homo_sapiens/chr1/data/reference/reference.fasta",
+    "tools_required": ["simuG", "python3"],
+    "command": "python3 ../../../scripts/build_segdup.py --ref ../../../homo_sapiens/chr1/data/reference/reference.fasta --copies 20 --identities 98.0,99.0,99.5,99.9 --spacer-kb 75 --seed {rng_seed} --out reference.fasta --truth-bed truth.bed --identity-map copy_identity_map.tsv",
+    "truth_outputs": ["truth.bed", "copy_identity_map.tsv"]
+  },
+  "simulation": {
+    "tool": "dwgsim",
+    "command": "dwgsim -1 150 -2 150 -C 30 -z {rng_seed} ../reference/reference.fasta reads && mv reads.bwa.read1.fastq.gz reads_1.fastq.gz && mv reads.bwa.read2.fastq.gz reads_2.fastq.gz",
+    "read_length_bp": 150,
+    "coverage_x": 30
+  },
+  "sweep": {
+    "parameter": "copy_identity_percent",
+    "values": [98.0, 99.0, 99.5, 99.9],
+    "notes": "Plot accuracy vs. identity to characterize at what identity threshold aligners begin mismapping or reducing MAPQ"
+  },
+  "truth": {
+    "type": "per_copy_placement",
+    "format": "bed",
+    "file": "data/reference/truth.bed",
+    "eval_notes": "Read from copy i must map to copy i. Track: (1) fraction correctly placed, (2) confidently_wrong (MAPQ >= 20, wrong copy), (3) MAPQ calibration at each identity level. confidently_wrong is the headline failure stat."
+  },
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-03"
+  }
+}

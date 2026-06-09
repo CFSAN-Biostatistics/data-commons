@@ -1,0 +1,22 @@
+{
+  "rng_seed": 1234567,
+  "simulation": {
+    "default_simulator": "dwgsim",
+    "read_length_bp": 150,
+    "default_coverage_x": 30,
+    "paired": true
+  },
+  "measurement": {
+    "threads": 8,
+    "replicates": 3,
+    "warm_cache": true
+  },
+  "scoring": {
+    "alpha": 0.7,
+    "placement_tolerance_bp": 10,
+    "mapq_bins": [[0,9],[10,19],[20,29],[30,39],[40,49],[50,59],[60,255]]
+  },
+  "pin_versions": true,
+  "spec_version": "0.1",
+  "spec_reference": "aligner_benchmark_normalization_spec.md"
+}

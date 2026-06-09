@@ -1,0 +1,37 @@
+{
+  "id": "T7b",
+  "name": "sc5314_diploid",
+  "organism": "Candida albicans",
+  "strain_assembly": "SC5314 Assembly 22 (phased diploid)",
+  "target_type": "real_genome",
+  "tier": 1,
+  "key_challenge": "Real heterozygosity, loss-of-heterozygosity (LOH) tracts, paralog families across haplotypes",
+  "size_approx": "28-29 Mb",
+  "ploidy": "diploid",
+  "reference": {
+    "source": "Candida Genome Database (CGD)",
+    "assembly_name": "Assembly 22",
+    "url": "http://www.candidagenome.org/download/sequence/C_albicans_SC5314/Assembly22/current/",
+    "annotation_url": "http://www.candidagenome.org/download/gff/C_albicans_SC5314/Assembly22/",
+    "notes": "Phased diploid assembly — 8 chromosome pairs. Use this target for heterozygosity and LOH testing. Hosted at CGD, not NCBI.",
+    "download": {
+      "tool": "wget",
+      "command": "wget -q -r -np -nd -A '*.fasta.gz,*.fa.gz' 'http://www.candidagenome.org/download/sequence/C_albicans_SC5314/Assembly22/current/' && cat *.fasta.gz *.fa.gz 2>/dev/null | gunzip > reference.fasta && rm -f *.fasta.gz *.fa.gz"
+    }
+  },
+  "simulation": {
+    "tool": "dwgsim",
+    "command": "dwgsim -1 150 -2 150 -C 50 -z {rng_seed} ../reference/reference.fasta reads && mv reads.bwa.read1.fastq.gz reads_1.fastq.gz && mv reads.bwa.read2.fastq.gz reads_2.fastq.gz",
+    "read_length_bp": 150,
+    "coverage_x": 50,
+    "notes": "Simulate from both haplotypes (full diploid FASTA). Reads from heterozygous sites are the diagnostic signal."
+  },
+  "truth": {
+    "simulated": "dwgsim read name encodes true origin coordinates; evaluate with paftools.js mapeval"
+  },
+  "benchmark_notes": "A PacBio HiFi read set exists (SRR23724250) for long-read assembly comparison — not needed for short-read mapping benchmark. Compare with sc5314_haploid to isolate heterozygosity contribution.",
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-03"
+  }
+}

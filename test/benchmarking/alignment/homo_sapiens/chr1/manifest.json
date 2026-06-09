@@ -1,0 +1,53 @@
+{
+  "id": "T1",
+  "name": "chr1",
+  "organism": "Homo sapiens",
+  "strain_assembly": "GRCh38",
+  "target_type": "real_genome",
+  "tier": 1,
+  "key_challenge": "Human SNP/repeat baseline; only target with real-read variant truth (GIAB)",
+  "size_approx": "249 Mb",
+  "length_bp": 248956422,
+  "ploidy": "diploid",
+  "reference": {
+    "refseq": "NC_000001.11",
+    "genbank": "CM000663.2",
+    "parent_assembly_genbank": "GCA_000001405.15",
+    "parent_assembly_refseq": "GCF_000001405.26",
+    "notes": "VERIFY current GRCh38 patch level at NCBI before download. chr1 sequence NC_000001.11 is stable across patches. Keep full GRCh38 available as mapping target so off-target mismapping is captured.",
+    "download": {
+      "tool": "entrez-direct",
+      "command": "efetch -db nucleotide -id NC_000001.11 -format fasta > reference.fasta"
+    }
+  },
+  "simulation": {
+    "tool": "dwgsim",
+    "command": "dwgsim -1 150 -2 150 -C 30 -z {rng_seed} ../reference/reference.fasta reads && mv reads.bwa.read1.fastq.gz reads_1.fastq.gz && mv reads.bwa.read2.fastq.gz reads_2.fastq.gz",
+    "read_length_bp": 150,
+    "coverage_x": 30,
+    "notes": "Map simulated reads against full GRCh38, not just chr1, to exercise off-target mismapping"
+  },
+  "real_reads": {
+    "flag": "--giab",
+    "description": "GIAB HG001/NA12878 ~300x 2x148bp Illumina WGS. Required for variant accuracy (VA) component of CAS.",
+    "source": "GIAB HG001/NA12878",
+    "sra_range_start": "SRX1049768",
+    "sra_range_end": "SRX1049855",
+    "coverage_x": 300,
+    "read_length_bp": 148,
+    "layout": "paired",
+    "ftp": "ftp://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/NA12878/NIST_NA12878_HG001_HiSeq_300x/",
+    "truth_vcf": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/NA12878_HG001/latest/GRCh38/",
+    "eval_tool": "hap.py",
+    "eval_notes": "Align to full GRCh38; restrict evaluation to chr1 intersected with GIAB high-confidence BED. Call variants with GATK HaplotypeCaller (pinned version). See AGENTS.md."
+  },
+  "truth": {
+    "simulated": "dwgsim read name encodes true origin coordinates; evaluate with paftools.js mapeval",
+    "variant": "GIAB truth VCF GRCh38 + high-confidence BED (--giab only)"
+  },
+  "benchmark_notes": "Primary human baseline. Simulated reads give mapping accuracy (PA, MCS). Real GIAB reads give variant accuracy (VA). VA is only defined for this target.",
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-03"
+  }
+}

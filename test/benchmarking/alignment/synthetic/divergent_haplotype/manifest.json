@@ -1,0 +1,44 @@
+{
+  "id": "S3",
+  "name": "divergent_haplotype",
+  "target_type": "synthetic",
+  "tier": 2,
+  "failure_mode": "read_dropout_mispenalization_diverged_haplotype",
+  "headline_stat": "fraction of H2-origin reads successfully mapped (sensitivity) and correctly placed",
+  "base_reference": "T1",
+  "construction": {
+    "tool": "simuG",
+    "description": "Take a 50 Mb slice of human chr1 as haplotype H1. Derive H2 by injecting SNPs and short indels at a target divergence rate (1-8%), well beyond human ~0.1% heterozygosity. Simulate reads from a diploid {H1, H2} mixture. Map only against H1.",
+    "parameters": {
+      "slice_mb": 50,
+      "divergence_percent": [1, 3, 5, 8],
+      "indel_fraction_of_divergence": 0.15
+    },
+    "requires_base_reference": "homo_sapiens/chr1/data/reference/reference.fasta",
+    "tools_required": ["simuG", "python3"],
+    "command": "python3 ../../../scripts/build_het_hybrid.py --ref ../../../homo_sapiens/chr1/data/reference/reference.fasta --slice-mb 50 --divergence 1,3,5,8 --indel-fraction 0.15 --seed {rng_seed} --out-h1 h1.fasta --out-h2 h2.fasta --truth-vcf truth.vcf",
+    "truth_outputs": ["h1.fasta", "h2.fasta", "truth.vcf"]
+  },
+  "simulation": {
+    "tool": "dwgsim",
+    "command": "dwgsim -1 150 -2 150 -C 30 -z {rng_seed} ../reference/h1.fasta reads_h1 && dwgsim -1 150 -2 150 -C 30 -z {rng_seed} ../reference/h2.fasta reads_h2 && cat reads_h1.bwa.read1.fastq.gz reads_h2.bwa.read1.fastq.gz > reads_1.fastq.gz && cat reads_h1.bwa.read2.fastq.gz reads_h2.bwa.read2.fastq.gz > reads_2.fastq.gz",
+    "read_length_bp": 150,
+    "coverage_x": 30,
+    "notes": "Simulate equal coverage from both haplotypes. Map mixed read set against H1 only. H2-origin reads are the diagnostic signal."
+  },
+  "sweep": {
+    "parameter": "divergence_percent",
+    "values": [1, 3, 5, 8],
+    "notes": "Each divergence level produces separate H2. Run construction and simulation for each level separately."
+  },
+  "truth": {
+    "type": "haplotype_of_origin",
+    "format": "dwgsim_read_names",
+    "mapping_target": "H1 only",
+    "eval_notes": "H2-origin reads mapped to H1: measure sensitivity (fraction mapped) and soft-clip rate vs. divergence. Track reference bias at heterozygous sites in the pileup."
+  },
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-06-03"
+  }
+}

@@ -1,0 +1,5 @@
+# Downloaded and generated data — fetch with acquire.py
+*/*/data/
+synthetic/*/data/
+__pycache__/
+scripts/__pycache__/

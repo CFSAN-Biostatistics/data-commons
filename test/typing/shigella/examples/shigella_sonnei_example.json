@@ -1,0 +1,85 @@
+{
+  "organism": "Shigella sonnei",
+  "curation": {
+    "date": "2026-06-08",
+    "ncbi_accessions": {
+      "biosample": "SAMN15421038",
+      "sra": "SRR12131981",
+      "assembly": null
+    },
+    "metadata_confidence": "high",
+    "serotype_evidence": [
+      {
+        "source": "BioSample.Organism.name",
+        "value": "Shigella sonnei"
+      },
+      {
+        "source": "BioSample.Attributes.strain",
+        "value": "AUSMDU00044076"
+      }
+    ],
+    "st_evidence": [
+      {
+        "source": "Expected",
+        "value": "ST152 (>90% of S. sonnei are ST152)"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": false,
+      "reported_coverage": null,
+      "submitter": "Australian surveillance",
+      "collection_date": "2020"
+    },
+    "notes": "Australian surveillance isolate AUSMDU00044076. Shigella sonnei confirmed by organism name. ST152 expected (dominant S. sonnei clone). ipaH gene must be present for Shigella species confirmation. Assembly not available - generate locally."
+  },
+  "ground_truth": {
+    "species_confirmation": {
+      "species": "Shigella sonnei",
+      "ipaH_present": true,
+      "serogroup": "D"
+    },
+    "serological": {
+      "serotype": "S. sonnei",
+      "serogroup": "D"
+    },
+    "mlst": {
+      "scheme": "ecoli",
+      "sequence_type": "152"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRR12131981",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRR12131981 && mv data/SRR12131981_1.fastq.gz data/reads_1.fq.gz && mv data/SRR12131981_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": null,
+      "download_cmd": null,
+      "notes": "Assembly not available in NCBI. Generate locally: spades.py -1 data/reads_1.fq.gz -2 data/reads_2.fq.gz -o assembly/ --careful && cp assembly/contigs.fasta data/contigs.fa"
+    }
+  },
+  "tools": {
+    "ShigaTyper": {
+      "input_type": "reads",
+      "run_cmd": "shigatyper --R1 data/reads_1.fq.gz --R2 data/reads_2.fq.gz --name sonnei > actual/shigatyper/result.tsv",
+      "reference_output": "expected/shigatyper/result.tsv"
+    },
+    "ipaH_detection": {
+      "input_type": "assembly",
+      "run_cmd": "blastn -query /path/to/ipaH.fasta -subject data/contigs.fa -outfmt 6 > actual/ipah_blast.tsv",
+      "reference_output": "expected/ipah_blast.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme ecoli data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "species_confirmation": "Expected species: Shigella sonnei (serogroup D). Tool must detect ipaH gene (invasion plasmid marker). Accept 'Shigella sonnei', 'S. sonnei', or 'serogroup D'. Do not accept E. coli unless tool notes 'Shigella-like' or 'EIEC'. ipaH gene is mandatory for Shigella confirmation.",
+    "mlst": "Expected ST152 (E. coli scheme). This is the dominant S. sonnei ST globally - over 90% of S. sonnei isolates are ST152 due to recent clonal expansion. Tool must use 'ecoli' scheme (Shigella uses E. coli MLST). Accept exact ST152 match. Any other ST for S. sonnei is rare and should be flagged for manual review - either a true variant or possible contamination."
+  },
+  "difficulty": "common",
+  "notes": "S. sonnei is monomorphic - nearly all isolates are ST152. ipaH gene presence is required for Shigella species confirmation. Australian surveillance strain. Assembly must be generated locally from reads."
+}

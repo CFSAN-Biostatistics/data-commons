@@ -1,0 +1,78 @@
+{
+  "organism": "Listeria monocytogenes",
+  "curation": {
+    "date": "2026-06-08",
+    "ncbi_accessions": {
+      "biosample": "SAMN10141071",
+      "sra": "SRR7912134",
+      "assembly": null
+    },
+    "metadata_confidence": "high",
+    "serotype_evidence": [
+      {
+        "source": "BioSample.Attributes.serotype",
+        "value": "1/2a"
+      },
+      {
+        "source": "BioSample.Attributes.strain",
+        "value": "R16.1882"
+      }
+    ],
+    "st_evidence": [
+      {
+        "source": "Expected",
+        "value": "ST5 (most common 1/2a ST)"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": false,
+      "reported_coverage": null,
+      "submitter": "Clinical/surveillance",
+      "collection_date": "2016",
+      "isolation_source": "blood",
+      "strain": "R16.1882"
+    },
+    "notes": "Blood isolate strain R16.1882. Serotype 1/2a confirmed in BioSample metadata. ST5 expected (most common 1/2a lineage). Blood source suggests clinical infection despite 1/2a being typically less virulent than 4b. Assembly not available - generate locally."
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "1/2a",
+      "lineage": "II"
+    },
+    "mlst": {
+      "scheme": "lmonocytogenes",
+      "sequence_type": "5",
+      "clonal_complex": "CC5"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRR7912134",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRR7912134 && mv data/SRR7912134_1.fastq.gz data/reads_1.fq.gz && mv data/SRR7912134_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": null,
+      "download_cmd": null,
+      "notes": "Assembly not available in NCBI. Generate locally: spades.py -1 data/reads_1.fq.gz -2 data/reads_2.fq.gz -o assembly/ --careful && cp assembly/contigs.fasta data/contigs.fa"
+    }
+  },
+  "tools": {
+    "LisSero": {
+      "input_type": "assembly",
+      "run_cmd": "lissero -i data/contigs.fa -o actual/lissero/ -t 4",
+      "reference_output": "expected/lissero/results.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme lmonocytogenes data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "serological": "Expected serotype 1/2a (Lineage II). Serotype confirmed in BioSample metadata. Accept exact match '1/2a', 'serotype 1/2a'. Also accept '1/2a/3a' (some tools group these closely related serotypes). Do not accept 1/2c as PASS (distinct serotype, though both Lineage II). Tool should confidently call 1/2a.",
+    "mlst": "Expected ST5 (lmonocytogenes scheme), serotype 1/2a, Lineage II. This is the most common Lineage II ST, frequently in food processing environments due to persistence. Accept exact ST5 match. All 7 loci should type successfully. ST5 is less virulent than Lineage I STs but this is a blood isolate (clinical infection). Do not accept ST121 as PASS (also 1/2a but hypervirulent variant with LIPI-3/LIPI-4)."
+  },
+  "difficulty": "common",
+  "notes": "Serotype 1/2a ST5 is the classic food processing persistent strain, but this is a blood isolate (clinical case). ST5 confirmed as expectation. Assembly must be generated locally from reads. Blood source notable for typically environmental serotype."
+}

@@ -1,0 +1,91 @@
+{
+  "organism": "Escherichia coli O104:H4",
+  "curation": {
+    "date": "2026-06-09",
+    "ncbi_accessions": {
+      "biosample": "SAMN19645968",
+      "sra": "SRR14771989",
+      "assembly": null
+    },
+    "metadata_confidence": "high",
+    "serotype_evidence": [
+      {
+        "source": "GenomeTrakr GIMS database",
+        "value": "O104:H4",
+        "gims_isolate": "ISO000117256"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": false,
+      "reported_coverage": "81.6x",
+      "file_size_mb": "308.4",
+      "strain": "20CA10GB05UCD-EC",
+      "collection_date": "2020-10",
+      "isolation_source": "ground beef",
+      "host": null,
+      "geo_loc": "USA:CA",
+      "collected_by": "WIFSS UC Davis"
+    },
+    "notes": "GenomeTrakr isolate ISO000117256 (SEQSEQ000113215). Strain 20CA10GB05UCD-EC. Isolation: ground beef from unknown host (2020-10). Assembly not available - generate locally."
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "O104:H4",
+      "o_antigen": "O104",
+      "h_antigen": "H4"
+    },
+    "virulence": {
+      "expected_genes": [
+        "stx2",
+        "aggR"
+      ],
+      "stec_confirmation": true
+    },
+    "mlst": {
+      "scheme": "ecoli",
+      "sequence_type": "678",
+      "phylogroup": "B1",
+      "notes": "Expected ST678 phylogroup B1"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRR14771989",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRR14771989 && mv data/SRR14771989_1.fastq.gz data/reads_1.fq.gz && mv data/SRR14771989_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": null,
+      "download_cmd": null,
+      "notes": "Assembly not available in NCBI. Generate locally: spades.py -1 data/reads_1.fq.gz -2 data/reads_2.fq.gz -o assembly/ --careful && cp assembly/contigs.fasta data/contigs.fa"
+    }
+  },
+  "tools": {
+    "ECTyper": {
+      "input_type": "assembly",
+      "run_cmd": "ectyper -i data/contigs.fa -o actual/ectyper/",
+      "reference_output": "expected/ectyper/output.tsv"
+    },
+    "SerotypeFinder": {
+      "input_type": "assembly",
+      "run_cmd": "serotypefinder.py -i data/contigs.fa -o actual/serotypefinder/ -d /path/to/serotypefinder_db",
+      "reference_output": "expected/serotypefinder/results_tab.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme ecoli data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    },
+    "ShigaToxinFinder": {
+      "input_type": "reads",
+      "run_cmd": "shigatoxinfinder.py -1 data/reads_1.fq.gz -2 data/reads_2.fq.gz -o actual/shigatoxin/",
+      "reference_output": "expected/shigatoxin/results.txt"
+    }
+  },
+  "validation_instructions": {
+    "serological": "Expected serotype O104:H4. Rare STEC with EAEC virulence profile. Should detect stx2 (Shiga toxin) and aggR (enteroaggregative regulator). ST678 expected but confirm with mlst tool.",
+    "mlst": "Run mlst with 'ecoli' scheme. Expected ST678 (phylogroup B1). Accept exact match."
+  },
+  "difficulty": "rare",
+  "notes": "2011 German outbreak strain (E. coli O104:H4). Unusual STEC/EAEC hybrid with Shiga toxin (stx2) and enteroaggregative traits (aggR). Associated with contaminated fenugreek sprouts. Ground beef isolate from California 2020."
+}

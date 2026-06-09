@@ -1,0 +1,86 @@
+{
+  "organism": "Escherichia coli O15:H18",
+  "curation": {
+    "date": "2026-06-09",
+    "ncbi_accessions": {
+      "biosample": "SAMN08596249",
+      "sra": "SRR6875395",
+      "assembly": null
+    },
+    "metadata_confidence": "high",
+    "serotype_evidence": [
+      {
+        "source": "GenomeTrakr GIMS database",
+        "value": "O15:H18",
+        "gims_isolate": "ISO000080430"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": false,
+      "reported_coverage": "81.0x",
+      "file_size_mb": "302.1",
+      "strain": "ECOL-17-VL-LA-TX-0026",
+      "collection_date": "2017-07",
+      "isolation_source": "Bite wound",
+      "host": "Canis lupus familiaris",
+      "geo_loc": "USA:TX",
+      "collected_by": "Texas A&M University Veterinary Medical Teaching Hospital Clinical Microbiology Laboratory"
+    },
+    "notes": "GenomeTrakr isolate ISO000080430 (SEQSEQ000070406). Strain ECOL-17-VL-LA-TX-0026. Isolation: Bite wound from Canis lupus familiaris (2017-07). Assembly not available - generate locally."
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "O15:H18",
+      "o_antigen": "O15",
+      "h_antigen": "H18"
+    },
+    "virulence": {
+      "expected_genes": [
+        "hlyA",
+        "cnf1"
+      ],
+      "expec_confirmation": true
+    },
+    "mlst": {
+      "scheme": "ecoli",
+      "sequence_type": "69",
+      "phylogroup": "D",
+      "notes": "Expected ST69 phylogroup D"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRR6875395",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRR6875395 && mv data/SRR6875395_1.fastq.gz data/reads_1.fq.gz && mv data/SRR6875395_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": null,
+      "download_cmd": null,
+      "notes": "Assembly not available in NCBI. Generate locally: spades.py -1 data/reads_1.fq.gz -2 data/reads_2.fq.gz -o assembly/ --careful && cp assembly/contigs.fasta data/contigs.fa"
+    }
+  },
+  "tools": {
+    "ECTyper": {
+      "input_type": "assembly",
+      "run_cmd": "ectyper -i data/contigs.fa -o actual/ectyper/",
+      "reference_output": "expected/ectyper/output.tsv"
+    },
+    "SerotypeFinder": {
+      "input_type": "assembly",
+      "run_cmd": "serotypefinder.py -i data/contigs.fa -o actual/serotypefinder/ -d /path/to/serotypefinder_db",
+      "reference_output": "expected/serotypefinder/results_tab.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme ecoli data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "serological": "Expected serotype O15:H18 and ST69 (phylogroup D). Accept exact match. ExPEC virulence profile: hlyA, cnf1. Less virulent than B2 ExPEC but established pathogenic lineage.",
+    "mlst": "Run mlst with 'ecoli' scheme. Expected ST69 (phylogroup D). Accept exact match."
+  },
+  "difficulty": "common",
+  "notes": "Classic ST69 serotype O15:H18. Phylogroup D ExPEC causing UTI and bacteremia. Dog bite wound isolate (Texas 2017). Less virulent than ST95/ST73 but clinically relevant. Veterinary ExPEC from dog infection."
+}

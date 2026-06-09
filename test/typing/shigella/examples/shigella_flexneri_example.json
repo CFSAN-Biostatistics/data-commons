@@ -1,0 +1,86 @@
+{
+  "organism": "Shigella flexneri",
+  "curation": {
+    "date": "2026-06-08",
+    "ncbi_accessions": {
+      "biosample": "SAMN16364053",
+      "sra": "SRR12769916",
+      "assembly": null
+    },
+    "metadata_confidence": "medium",
+    "serotype_evidence": [
+      {
+        "source": "BioSample.Organism.name",
+        "value": "Shigella flexneri"
+      },
+      {
+        "source": "BioSample.Attributes.serotype",
+        "value": "Shigella flexneri"
+      }
+    ],
+    "st_evidence": [
+      {
+        "source": "Expected",
+        "value": "ST245 or related (common in S. flexneri 2a)"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": false,
+      "reported_coverage": null,
+      "submitter": "Research submitter",
+      "collection_date": "2019-09",
+      "isolation_source": "human"
+    },
+    "notes": "Human isolate strain 815580. Shigella flexneri confirmed by organism name. Serotype subtype (2a) not specified in metadata but ST245 is commonly associated with 2a. ipaH gene must be present. Assembly not available - generate locally. Metadata confidence medium pending serotype verification."
+  },
+  "ground_truth": {
+    "species_confirmation": {
+      "species": "Shigella flexneri",
+      "ipaH_present": true,
+      "serogroup": "B"
+    },
+    "serological": {
+      "serotype": "S. flexneri 2a",
+      "serogroup": "B"
+    },
+    "mlst": {
+      "scheme": "ecoli",
+      "sequence_type": "245"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRR12769916",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRR12769916 && mv data/SRR12769916_1.fastq.gz data/reads_1.fq.gz && mv data/SRR12769916_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": null,
+      "download_cmd": null,
+      "notes": "Assembly not available in NCBI. Generate locally: spades.py -1 data/reads_1.fq.gz -2 data/reads_2.fq.gz -o assembly/ --careful && cp assembly/contigs.fasta data/contigs.fa"
+    }
+  },
+  "tools": {
+    "ShigaTyper": {
+      "input_type": "reads",
+      "run_cmd": "shigatyper --R1 data/reads_1.fq.gz --R2 data/reads_2.fq.gz --name flexneri > actual/shigatyper/result.tsv",
+      "reference_output": "expected/shigatyper/result.tsv"
+    },
+    "ipaH_detection": {
+      "input_type": "assembly",
+      "run_cmd": "blastn -query /path/to/ipaH.fasta -subject data/contigs.fa -outfmt 6 > actual/ipah_blast.tsv",
+      "reference_output": "expected/ipah_blast.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme ecoli data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "species_confirmation": "Expected species: Shigella flexneri serotype 2a (serogroup B). Tool must detect ipaH gene. Accept exact match 'S. flexneri 2a', 'Shigella flexneri 2a', or 'serotype 2a'. Accept 'S. flexneri' without subserotype as PARTIAL (species correct but incomplete typing). Do not accept other subserotypes (2b, 3a, etc.) as PASS - those are distinct serotypes.",
+    "mlst": "Expected ST245 (E. coli scheme). S. flexneri is phylogenetically diverse with many STs. ST245 is common in S. flexneri 2a isolates. Tool must use 'ecoli' scheme. Accept exact ST245 match. Accept other STs (ST147, ST148) as PARTIAL if species is confirmed S. flexneri - S. flexneri has high ST diversity, so exact ST match is less critical than for S. sonnei."
+  },
+  "difficulty": "common",
+  "notes": "S. flexneri 2a is the most common S. flexneri serotype globally. Unlike S. sonnei, S. flexneri has high ST diversity. ST245 is common but not dominant. Assembly must be generated locally. Verify serotype subtype and ST after tool runs."
+}

@@ -1,0 +1,76 @@
+{
+  "organism": "Listeria monocytogenes",
+  "curation": {
+    "date": "2026-06-08",
+    "ncbi_accessions": {
+      "biosample": "SAMN12706452",
+      "sra": "SRR10078142",
+      "assembly": null
+    },
+    "metadata_confidence": "high",
+    "serotype_evidence": [
+      {
+        "source": "BioSample.Organism.name",
+        "value": "Listeria monocytogenes ATCC 19115"
+      },
+      {
+        "source": "ATCC.Catalog",
+        "value": "ATCC 19115 is serotype 4b reference strain"
+      }
+    ],
+    "st_evidence": [
+      {
+        "source": "Literature.ATCC19115",
+        "value": "ST2 (verified for ATCC 19115)"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": false,
+      "reported_coverage": null,
+      "submitter": "ATCC type strain collection",
+      "strain": "ATCC 19115"
+    },
+    "notes": "ATCC 19115 type strain - serotype 4b reference strain. ST2 confirmed in literature for this strain. This is a well-characterized reference isolate used for serotype 4b validation. Assembly not available in NCBI - generate locally from reads."
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "4b",
+      "lineage": "I"
+    },
+    "mlst": {
+      "scheme": "lmonocytogenes",
+      "sequence_type": "2",
+      "clonal_complex": "CC2"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRR10078142",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRR10078142 && mv data/SRR10078142_1.fastq.gz data/reads_1.fq.gz && mv data/SRR10078142_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": null,
+      "download_cmd": null,
+      "notes": "Assembly not available in NCBI. Generate locally: spades.py -1 data/reads_1.fq.gz -2 data/reads_2.fq.gz -o assembly/ --careful && cp assembly/contigs.fasta data/contigs.fa"
+    }
+  },
+  "tools": {
+    "LisSero": {
+      "input_type": "assembly",
+      "run_cmd": "lissero -i data/contigs.fa -o actual/lissero/ -t 4",
+      "reference_output": "expected/lissero/results.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme lmonocytogenes data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "serological": "Expected serotype 4b (Lineage I). This is ATCC 19115, a reference strain for serotype 4b. Accept exact match '4b', 'serotype 4b', or '4b/4d/4e' (tools may group these). Do not accept 1/2b as PASS (different serotype, though both are Lineage I). Tool should confidently call 4b for this reference strain.",
+    "mlst": "Expected ST2 (lmonocytogenes scheme), serotype 4b, Lineage I. ATCC 19115 is documented as ST2 in literature. All 7 loci must be typed successfully: abcZ(1), bglA(1), cat(1), dapE(1), dat(1), ldh(1), lhkA(1). Accept exact ST2 match. Do not accept ST6 as PASS (also serotype 4b but distinct clone). This is a reference strain - exact match expected."
+  },
+  "difficulty": "common",
+  "notes": "ATCC 19115 is a well-characterized serotype 4b reference strain. ST2 is the major epidemic clone but this specific strain is used as a serotyping reference. Assembly must be generated locally from reads. High confidence in ground truth based on reference strain status."
+}

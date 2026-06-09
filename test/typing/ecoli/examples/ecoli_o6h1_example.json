@@ -1,0 +1,92 @@
+{
+  "organism": "Escherichia coli O6:H1",
+  "curation": {
+    "date": "2026-06-09",
+    "ncbi_accessions": {
+      "biosample": "SAMN08943194",
+      "sra": "SRR7042029",
+      "assembly": null
+    },
+    "metadata_confidence": "medium",
+    "serotype_evidence": [
+      {
+        "source": "GenomeTrakr GIMS database",
+        "value": "O6:H1",
+        "gims_isolate": "ISO000083983"
+      },
+      {
+        "source": "NCBI BioSample organism name",
+        "value": "O119",
+        "notes": "Discrepancy with GenomeTrakr - requires tool verification"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": false,
+      "reported_coverage": "72.0x",
+      "file_size_mb": "296.9",
+      "strain": "99.1894",
+      "collection_date": "1999",
+      "isolation_source": "missing",
+      "host": "canine",
+      "geo_loc": "USA:MN",
+      "collected_by": "Pennsylvania State University | Escherichia coli Reference Center"
+    },
+    "notes": "GenomeTrakr isolate ISO000083983 (SEQSEQ000072745). Strain 99.1894. Isolation: missing from canine (1999). Assembly not available - generate locally."
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "O6:H1",
+      "o_antigen": "O6",
+      "h_antigen": "H1"
+    },
+    "virulence": {
+      "expected_genes": [
+        "pap",
+        "hlyA",
+        "cnf1"
+      ],
+      "expec_confirmation": true
+    },
+    "mlst": {
+      "scheme": "ecoli",
+      "sequence_type": "73",
+      "phylogroup": "B2",
+      "notes": "Expected ST73 phylogroup B2"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRR7042029",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRR7042029 && mv data/SRR7042029_1.fastq.gz data/reads_1.fq.gz && mv data/SRR7042029_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": null,
+      "download_cmd": null,
+      "notes": "Assembly not available in NCBI. Generate locally: spades.py -1 data/reads_1.fq.gz -2 data/reads_2.fq.gz -o assembly/ --careful && cp assembly/contigs.fasta data/contigs.fa"
+    }
+  },
+  "tools": {
+    "ECTyper": {
+      "input_type": "assembly",
+      "run_cmd": "ectyper -i data/contigs.fa -o actual/ectyper/",
+      "reference_output": "expected/ectyper/output.tsv"
+    },
+    "SerotypeFinder": {
+      "input_type": "assembly",
+      "run_cmd": "serotypefinder.py -i data/contigs.fa -o actual/serotypefinder/ -d /path/to/serotypefinder_db",
+      "reference_output": "expected/serotypefinder/results_tab.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme ecoli data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "serological": "Expected O6:H1 (per GenomeTrakr) but NCBI BioSample says O119. PARTIAL acceptable if either serotype detected. Verify with both tools. Expected ExPEC virulence: pap, hlyA, cnf1. Likely ST73 or ST127.",
+    "mlst": "Run mlst with 'ecoli' scheme. Expected ST73 (phylogroup B2). Accept exact match."
+  },
+  "difficulty": "complex",
+  "notes": "Classic UPEC serotype O6:H1, typically ST73 phylogroup B2. Canine isolate 1999 from E. coli Reference Center. NCBI metadata shows \"O119\" but GenomeTrakr GIMS database shows \"O6:H1\" - serotype discrepancy requires verification with typing tools."
+}

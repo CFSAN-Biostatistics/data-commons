@@ -1,0 +1,93 @@
+{
+  "organism": "Escherichia coli O157:H7",
+  "curation": {
+    "date": "2026-06-09",
+    "ncbi_accessions": {
+      "biosample": "SAMN34265623",
+      "sra": "SRR24226263",
+      "assembly": null
+    },
+    "metadata_confidence": "high",
+    "serotype_evidence": [
+      {
+        "source": "GenomeTrakr GIMS database",
+        "value": "O157:H7",
+        "gims_isolate": "ISO000128536"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": false,
+      "reported_coverage": "65.1x",
+      "file_size_mb": "391.8",
+      "strain": "RM13485",
+      "collection_date": "2010",
+      "isolation_source": "feral pig",
+      "host": "porcine",
+      "geo_loc": "USA",
+      "collected_by": "United States Department of Agriculture| Agricultural Research Service WRRC"
+    },
+    "notes": "GenomeTrakr isolate ISO000128536 (SEQSEQ000130868). Strain RM13485. Isolation: feral pig from porcine (2010). Assembly not available - generate locally."
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "O157:H7",
+      "o_antigen": "O157",
+      "h_antigen": "H7"
+    },
+    "virulence": {
+      "expected_genes": [
+        "stx1",
+        "stx2",
+        "eae",
+        "ehxA"
+      ],
+      "stec_confirmation": true
+    },
+    "mlst": {
+      "scheme": "ecoli",
+      "sequence_type": "11",
+      "notes": "ST11 is the dominant O157:H7 lineage"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRR24226263",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRR24226263 && mv data/SRR24226263_1.fastq.gz data/reads_1.fq.gz && mv data/SRR24226263_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": null,
+      "download_cmd": null,
+      "notes": "Assembly not available in NCBI. Generate locally: spades.py -1 data/reads_1.fq.gz -2 data/reads_2.fq.gz -o assembly/ --careful && cp assembly/contigs.fasta data/contigs.fa"
+    }
+  },
+  "tools": {
+    "ECTyper": {
+      "input_type": "assembly",
+      "run_cmd": "ectyper -i data/contigs.fa -o actual/ectyper/",
+      "reference_output": "expected/ectyper/output.tsv"
+    },
+    "SerotypeFinder": {
+      "input_type": "assembly",
+      "run_cmd": "serotypefinder.py -i data/contigs.fa -o actual/serotypefinder/ -d /path/to/serotypefinder_db",
+      "reference_output": "expected/serotypefinder/results_tab.tsv"
+    },
+    "ShigaToxinFinder": {
+      "input_type": "reads",
+      "run_cmd": "shigatoxinfinder.py -1 data/reads_1.fq.gz -2 data/reads_2.fq.gz -o actual/shigatoxin/",
+      "reference_output": "expected/shigatoxin/results.txt"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme ecoli data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "serological": "Expected serotype O157:H7. Accept exact match 'O157:H7' or individual O/H antigen calls that match. Serotype confirmed in GenomeTrakr GIMS database (ISOISO000128536). Tool should confidently call this serotype.",
+    "virulence": "Expected STEC virulence genes: stx1, stx2, eae, ehxA. At minimum, stx (Shiga toxin) and eae (intimin) should be detected for typical STEC. Accept PASS if all expected genes found. PARTIAL if stx present but other genes missing.",
+    "mlst": "Expected ST11 (dominant O157:H7 lineage). Accept exact ST11 match. Other STs unusual for O157:H7."
+  },
+  "difficulty": "common",
+  "notes": "Classic STEC serotype, major cause of HUS. ST11 is the dominant lineage."
+}

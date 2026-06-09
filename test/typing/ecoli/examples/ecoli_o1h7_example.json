@@ -1,0 +1,87 @@
+{
+  "organism": "Escherichia coli O1:H7",
+  "curation": {
+    "date": "2026-06-09",
+    "ncbi_accessions": {
+      "biosample": "SAMN13012205",
+      "sra": "SRR10257703",
+      "assembly": null
+    },
+    "metadata_confidence": "high",
+    "serotype_evidence": [
+      {
+        "source": "GenomeTrakr GIMS database",
+        "value": "O1:H7",
+        "gims_isolate": "ISO000104797"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": false,
+      "reported_coverage": "82.0x",
+      "file_size_mb": "315.1",
+      "strain": "ECOL-19-VL-SD-OK-0007",
+      "collection_date": "2019-02",
+      "isolation_source": "wound swab (Canis lupus familiaris)",
+      "host": null,
+      "geo_loc": "USA:OK",
+      "collected_by": "OADDL - OK"
+    },
+    "notes": "GenomeTrakr isolate ISO000104797 (SEQSEQ000098727). Strain ECOL-19-VL-SD-OK-0007. Isolation: wound swab (Canis lupus familiaris) from unknown host (2019-02). Assembly not available - generate locally."
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "O1:H7",
+      "o_antigen": "O1",
+      "h_antigen": "H7"
+    },
+    "virulence": {
+      "expected_genes": [
+        "ibeA",
+        "hlyA",
+        "cnf1"
+      ],
+      "expec_confirmation": true
+    },
+    "mlst": {
+      "scheme": "ecoli",
+      "sequence_type": "95",
+      "phylogroup": "B2",
+      "notes": "Expected ST95 phylogroup B2"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRR10257703",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRR10257703 && mv data/SRR10257703_1.fastq.gz data/reads_1.fq.gz && mv data/SRR10257703_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": null,
+      "download_cmd": null,
+      "notes": "Assembly not available in NCBI. Generate locally: spades.py -1 data/reads_1.fq.gz -2 data/reads_2.fq.gz -o assembly/ --careful && cp assembly/contigs.fasta data/contigs.fa"
+    }
+  },
+  "tools": {
+    "ECTyper": {
+      "input_type": "assembly",
+      "run_cmd": "ectyper -i data/contigs.fa -o actual/ectyper/",
+      "reference_output": "expected/ectyper/output.tsv"
+    },
+    "SerotypeFinder": {
+      "input_type": "assembly",
+      "run_cmd": "serotypefinder.py -i data/contigs.fa -o actual/serotypefinder/ -d /path/to/serotypefinder_db",
+      "reference_output": "expected/serotypefinder/results_tab.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme ecoli data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "serological": "Expected serotype O1:H7. Check for K1 capsule genes (if present, likely ST95). ExPEC virulence genes expected: ibeA, hlyA, cnf1. ST may be ST95, ST59, or other B2 lineage depending on K1 status.",
+    "mlst": "Run mlst with 'ecoli' scheme. Expected ST95 (phylogroup B2). Accept exact match."
+  },
+  "difficulty": "common",
+  "notes": "ExPEC serotype O1:H7, often associated with ST95 neonatal meningitis strains when K1 capsule present. This isolate from dog wound (Oklahoma 2019) likely lacks K1. O1:H7 without K1 typically ST59 or other B2 lineages. Veterinary ExPEC."
+}

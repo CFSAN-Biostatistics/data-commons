@@ -2,11 +2,12 @@
   "id": "T8b",
   "name": "hexaploid",
   "organism": "Triticum aestivum",
-  "strain_assembly": "Chinese Spring IWGSC RefSeq v2.1 — full hexaploid",
+  "strain_assembly": "Chinese Spring IWGSC RefSeq v2.1 \u2014 full hexaploid",
   "target_type": "real_genome",
   "tier": 1,
   "key_challenge": "Cross-subgenome homeolog ambiguity (~95%), full scale polyploid (17 Gb, AABBDD, 2n=6x=42)",
   "size_approx": "14.5-17 Gb",
+  "genome_size_bp": 14547261565,
   "ploidy": "hexaploid",
   "reference": {
     "assembly": "IWGSC RefSeq v2.1",
@@ -24,7 +25,7 @@
     "command": "art_illumina -ss HS25 -i ../reference/reference.fasta -p -l 150 -f 5 -rs {rng_seed} -o reads && gzip reads1.fq reads2.fq && mv reads1.fq.gz reads_1.fastq.gz && mv reads2.fq.gz reads_2.fastq.gz",
     "read_length_bp": 150,
     "coverage_x": 5,
-    "notes": "5x coverage for 17 Gb genome. MEI (index memory) is a primary concern here — document peak RSS carefully."
+    "notes": "5x coverage for 17 Gb genome. MEI (index memory) is a primary concern here \u2014 document peak RSS carefully."
   },
   "truth": {
     "simulated": "art_illumina read name encodes true origin; parse with custom comparator or paftools.js mapeval"

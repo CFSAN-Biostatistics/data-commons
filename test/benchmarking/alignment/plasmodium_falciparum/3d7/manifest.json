@@ -7,6 +7,7 @@
   "tier": 1,
   "key_challenge": "Extreme AT-bias (~81% AT), subtelomeric var/rifin/stevor repeat families",
   "size_approx": "23.3 Mb",
+  "genome_size_bp": 23264338,
   "chromosomes": 14,
   "at_percent": 81.0,
   "ploidy": "haploid",

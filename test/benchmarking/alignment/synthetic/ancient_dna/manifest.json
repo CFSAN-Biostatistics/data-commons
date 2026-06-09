@@ -3,6 +3,7 @@
   "name": "ancient_dna",
   "target_type": "synthetic",
   "tier": 2,
+  "genome_size_bp": 248956422,
   "failure_mode": "short_damaged_read_sensitivity_mapq_calibration",
   "headline_stat": "mapped fraction vs. fragment length; whether damage-induced mismatches inflate MAPQ penalties",
   "base_reference": "T1",

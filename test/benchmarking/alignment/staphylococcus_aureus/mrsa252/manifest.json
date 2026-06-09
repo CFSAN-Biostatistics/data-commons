@@ -7,6 +7,7 @@
   "tier": 1,
   "key_challenge": "Mobile genetic elements, low GC (~32.8%), pathogenicity islands",
   "size_approx": "2.90 Mb",
+  "genome_size_bp": 2902619,
   "length_bp": 2902619,
   "gc_percent": 32.8,
   "ploidy": "haploid",
@@ -29,7 +30,7 @@
   "truth": {
     "simulated": "dwgsim read name encodes true origin coordinates; evaluate with paftools.js mapeval"
   },
-  "benchmark_notes": "Low GC and mobile elements (IS256, pathogenicity islands) create alignment ambiguity. Circular chromosome — confirm aligner handles linearized FASTA correctly or circularize before simulation.",
+  "benchmark_notes": "Low GC and mobile elements (IS256, pathogenicity islands) create alignment ambiguity. Circular chromosome \u2014 confirm aligner handles linearized FASTA correctly or circularize before simulation.",
   "curation": {
     "curator": "Justin Payne",
     "date": "2026-06-03"

@@ -7,13 +7,14 @@
   "tier": 1,
   "key_challenge": "Real heterozygosity, loss-of-heterozygosity (LOH) tracts, paralog families across haplotypes",
   "size_approx": "28-29 Mb",
+  "genome_size_bp": 28565332,
   "ploidy": "diploid",
   "reference": {
     "source": "Candida Genome Database (CGD)",
     "assembly_name": "Assembly 22",
     "url": "http://www.candidagenome.org/download/sequence/C_albicans_SC5314/Assembly22/current/",
     "annotation_url": "http://www.candidagenome.org/download/gff/C_albicans_SC5314/Assembly22/",
-    "notes": "Phased diploid assembly — 8 chromosome pairs. Use this target for heterozygosity and LOH testing. Hosted at CGD, not NCBI.",
+    "notes": "Phased diploid assembly \u2014 8 chromosome pairs. Use this target for heterozygosity and LOH testing. Hosted at CGD, not NCBI.",
     "download": {
       "tool": "wget",
       "command": "wget -q -r -np -nd -A '*.fasta.gz,*.fa.gz' 'http://www.candidagenome.org/download/sequence/C_albicans_SC5314/Assembly22/current/' && cat *.fasta.gz *.fa.gz 2>/dev/null | gunzip > reference.fasta && rm -f *.fasta.gz *.fa.gz"
@@ -29,7 +30,7 @@
   "truth": {
     "simulated": "dwgsim read name encodes true origin coordinates; evaluate with paftools.js mapeval"
   },
-  "benchmark_notes": "A PacBio HiFi read set exists (SRR23724250) for long-read assembly comparison — not needed for short-read mapping benchmark. Compare with sc5314_haploid to isolate heterozygosity contribution.",
+  "benchmark_notes": "A PacBio HiFi read set exists (SRR23724250) for long-read assembly comparison \u2014 not needed for short-read mapping benchmark. Compare with sc5314_haploid to isolate heterozygosity contribution.",
   "curation": {
     "curator": "Justin Payne",
     "date": "2026-06-03"

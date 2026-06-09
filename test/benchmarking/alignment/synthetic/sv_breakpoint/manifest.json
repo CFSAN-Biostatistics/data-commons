@@ -3,21 +3,34 @@
   "name": "sv_breakpoint",
   "target_type": "synthetic",
   "tier": 2,
+  "genome_size_bp": 50000000,
   "failure_mode": "aligner_behavior_at_sv_breakpoints_clip_split_mismap",
   "headline_stat": "split-read recall and breakpoint-position accuracy vs. breakpoint density",
   "base_reference": "T1",
   "construction": {
     "tool": "VISOR",
-    "description": "Take a clean 50 Mb slice of human chr1. Implant dense structural variation — inversions, translocations, and tandem expansions at ~1-5 kb spacing — so a large fraction of reads span a breakpoint. Record every breakpoint in a truth BED.",
+    "description": "Take a clean 50 Mb slice of human chr1. Implant dense structural variation \u2014 inversions, translocations, and tandem expansions at ~1-5 kb spacing \u2014 so a large fraction of reads span a breakpoint. Record every breakpoint in a truth BED.",
     "parameters": {
       "base_slice_mb": 50,
-      "sv_types": ["inversion", "translocation", "tandem_expansion"],
-      "spacing_kb_values": [5, 2, 1]
+      "sv_types": [
+        "inversion",
+        "translocation",
+        "tandem_expansion"
+      ],
+      "spacing_kb_values": [
+        5,
+        2,
+        1
+      ]
     },
     "requires_base_reference": "homo_sapiens/chr1/data/reference/reference.fasta",
-    "tools_required": ["VISOR"],
+    "tools_required": [
+      "VISOR"
+    ],
     "command": "VISOR HACk -g ../../../homo_sapiens/chr1/data/reference/reference.fasta -b svs.bed -o visor_out && mv visor_out/h1.fa reference.fasta",
-    "truth_outputs": ["svs.bed"],
+    "truth_outputs": [
+      "svs.bed"
+    ],
     "notes": "Generate svs.bed with VISOR format SVs at the desired spacing before running HACk. See VISOR documentation for BED format. SURVIVOR can also be used to generate the SV BED."
   },
   "simulation": {
@@ -25,11 +38,15 @@
     "command": "dwgsim -1 150 -2 150 -C 30 -z {rng_seed} ../reference/reference.fasta reads && mv reads.bwa.read1.fastq.gz reads_1.fastq.gz && mv reads.bwa.read2.fastq.gz reads_2.fastq.gz",
     "read_length_bp": 150,
     "coverage_x": 30,
-    "notes": "At 150bp reads and 1kb SV spacing, roughly 30% of reads will span a breakpoint — sufficient for split-read analysis."
+    "notes": "At 150bp reads and 1kb SV spacing, roughly 30% of reads will span a breakpoint \u2014 sufficient for split-read analysis."
   },
   "sweep": {
     "parameter": "spacing_kb",
-    "values": [5, 2, 1],
+    "values": [
+      5,
+      2,
+      1
+    ],
     "notes": "Build three versions of the synthetic reference at each spacing. Denser spacing means more reads spanning breakpoints and harder disambiguation."
   },
   "truth": {

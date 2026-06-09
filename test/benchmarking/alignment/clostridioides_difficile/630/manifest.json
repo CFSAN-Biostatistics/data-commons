@@ -7,13 +7,14 @@
   "tier": 1,
   "key_challenge": "Mosaic genome with mobile genetic elements, moderate AT-bias (~71% AT)",
   "size_approx": "4.29 Mb",
+  "genome_size_bp": 4290252,
   "gc_percent": 29.0,
   "ploidy": "haploid",
   "reference": {
     "genbank": "AM180355.1",
     "refseq": "NC_009089.1",
     "resequenced_alt": "CP010905.2",
-    "notes": "AM180355.1/NC_009089.1 is the canonical 630 reference. CP010905.2 is a SMRT-resequenced version that resolves some mobile elements — choose one and be consistent across the benchmark run.",
+    "notes": "AM180355.1/NC_009089.1 is the canonical 630 reference. CP010905.2 is a SMRT-resequenced version that resolves some mobile elements \u2014 choose one and be consistent across the benchmark run.",
     "download": {
       "tool": "entrez-direct",
       "command": "efetch -db nucleotide -id NC_009089.1 -format fasta > reference.fasta"
@@ -28,7 +29,7 @@
   "truth": {
     "simulated": "dwgsim read name encodes true origin coordinates; evaluate with paftools.js mapeval"
   },
-  "benchmark_notes": "Mobile elements (Tn916-family, CTn elements) create repeat-driven ambiguity. Real short reads available under ENA sample ERS550098 (630Δerm). Mosaic genome structure means aligner behavior varies substantially by region.",
+  "benchmark_notes": "Mobile elements (Tn916-family, CTn elements) create repeat-driven ambiguity. Real short reads available under ENA sample ERS550098 (630\u0394erm). Mosaic genome structure means aligner behavior varies substantially by region.",
   "curation": {
     "curator": "Justin Payne",
     "date": "2026-06-03"

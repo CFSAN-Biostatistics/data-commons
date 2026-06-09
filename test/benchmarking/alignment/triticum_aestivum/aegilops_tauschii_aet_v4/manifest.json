@@ -5,8 +5,9 @@
   "strain_assembly": "AL8/78 Aet v4.0",
   "target_type": "real_genome",
   "tier": 1,
-  "key_challenge": "Wheat D-genome donor — wheat-like repeat landscape without hexaploidy, diploid tractable alternative to T8a/T8b",
+  "key_challenge": "Wheat D-genome donor \u2014 wheat-like repeat landscape without hexaploidy, diploid tractable alternative to T8a/T8b",
   "size_approx": "4.3 Gb",
+  "genome_size_bp": 4328740955,
   "ploidy": "diploid",
   "reference": {
     "genbank": "GCA_002575655.1",
@@ -30,6 +31,6 @@
   "curation": {
     "curator": "Justin Payne",
     "date": "2026-06-03",
-    "notes": "VERIFY assembly version before download — Aet v5.0 and v6.0 are available and may be preferable."
+    "notes": "VERIFY assembly version before download \u2014 Aet v5.0 and v6.0 are available and may be preferable."
   }
 }

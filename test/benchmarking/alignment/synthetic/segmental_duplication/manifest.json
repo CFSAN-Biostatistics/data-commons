@@ -3,6 +3,7 @@
   "name": "segmental_duplication",
   "target_type": "synthetic",
   "tier": 2,
+  "genome_size_bp": 37500000,
   "failure_mode": "confident_mismap_high_identity_paralogs",
   "headline_stat": "fraction of reads with high MAPQ placed on wrong copy (confidently_wrong)",
   "base_reference": "T1",
@@ -11,14 +12,25 @@
     "description": "Build a ~25-50 Mb synthetic genome of N copies of a 1 Mb core block from human chr1, each mutated to a target pairwise identity via SNP/indel injection, separated by unique spacer sequences. Record per-copy identity labels for stratified accuracy scoring.",
     "parameters": {
       "copies": 20,
-      "identities_percent": [98.0, 99.0, 99.5, 99.9],
+      "identities_percent": [
+        98.0,
+        99.0,
+        99.5,
+        99.9
+      ],
       "core_block_mb": 1,
       "spacer_kb": 75
     },
     "requires_base_reference": "homo_sapiens/chr1/data/reference/reference.fasta",
-    "tools_required": ["simuG", "python3"],
+    "tools_required": [
+      "simuG",
+      "python3"
+    ],
     "command": "python3 ../../../scripts/build_segdup.py --ref ../../../homo_sapiens/chr1/data/reference/reference.fasta --copies 20 --identities 98.0,99.0,99.5,99.9 --spacer-kb 75 --seed {rng_seed} --out reference.fasta --truth-bed truth.bed --identity-map copy_identity_map.tsv",
-    "truth_outputs": ["truth.bed", "copy_identity_map.tsv"]
+    "truth_outputs": [
+      "truth.bed",
+      "copy_identity_map.tsv"
+    ]
   },
   "simulation": {
     "tool": "dwgsim",
@@ -28,7 +40,12 @@
   },
   "sweep": {
     "parameter": "copy_identity_percent",
-    "values": [98.0, 99.0, 99.5, 99.9],
+    "values": [
+      98.0,
+      99.0,
+      99.5,
+      99.9
+    ],
     "notes": "Plot accuracy vs. identity to characterize at what identity threshold aligners begin mismapping or reducing MAPQ"
   },
   "truth": {

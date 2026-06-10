@@ -1,0 +1,79 @@
+{
+  "organism": "Escherichia coli unknown",
+  "curation": {
+    "date": "2026-06-10",
+    "ncbi_accessions": {
+      "biosample": "SAMN16357522",
+      "sra": "SRS9431228",
+      "assembly": "GCA_019048425.1"
+    },
+    "metadata_confidence": "medium",
+    "serotype_evidence": [
+      {
+        "source": "FDA_ARGOS_strain",
+        "value": "N/A"
+      },
+      {
+        "source": "FDA_ARGOS",
+        "value": "Reference-grade genome from FDA ARGOS BioProject PRJNA231221"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": true,
+      "strain": "FDAARGOS 1380",
+      "collection_date": "Unknown",
+      "isolation_source": "missing",
+      "host": "missing",
+      "geo_loc": "USA:MT",
+      "collected_by": "Montana State U"
+    },
+    "notes": "FDA ARGOS isolate FDAARGOS 1380. Serotype unknown expected - verify with ECTyper. High-quality reference genome from FDA regulatory program."
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "unknown",
+      "o_antigen": "unknown",
+      "h_antigen": "unknown"
+    },
+    "mlst": {
+      "scheme": "ecoli",
+      "sequence_type": "unknown",
+      "notes": "ST unknown - determine with mlst tool"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRS9431228",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRS9431228 && mv data/SRS9431228_1.fastq.gz data/reads_1.fq.gz && mv data/SRS9431228_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": "GCA_019048425.1",
+      "download_cmd": "datasets download genome accession GCA_019048425.1 --filename data/FDAARGOS 1380.zip && unzip -j data/FDAARGOS 1380.zip '*.fna' -d data/ && mv data/*.fna data/contigs.fa",
+      "notes": "FDA ARGOS reference assembly available"
+    }
+  },
+  "tools": {
+    "ECTyper": {
+      "input_type": "assembly",
+      "run_cmd": "ectyper -i data/contigs.fa -o actual/ectyper/",
+      "reference_output": "expected/ectyper/output.tsv"
+    },
+    "SerotypeFinder": {
+      "input_type": "assembly",
+      "run_cmd": "serotypefinder.py -i data/contigs.fa -o actual/serotypefinder/ -d /path/to/serotypefinder_db",
+      "reference_output": "expected/serotypefinder/results_tab.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme ecoli data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "serological": "Expected serotype unknown. Accept exact match or individual O/H antigen calls. Serotype not in metadata - ECTyper determines ground truth.",
+    "mlst": "ST unknown - mlst tool determines ground truth. Document observed ST."
+  },
+  "difficulty": "medium",
+  "notes": "FDA ARGOS unknown isolate. Source: missing."
+}

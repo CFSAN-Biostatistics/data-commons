@@ -1,0 +1,87 @@
+{
+  "organism": "Shigella sonnei",
+  "curation": {
+    "date": "2026-06-10",
+    "ncbi_accessions": {
+      "biosample": "SAMN11056430",
+      "sra": "SRS4857653",
+      "assembly": "GCF_009729995.1"
+    },
+    "metadata_confidence": "medium",
+    "serotype_evidence": [
+      {
+        "source": "BioSample.Organism.name",
+        "value": "Pathogen: clinical or host-associated sample from Shigella sonnei"
+      },
+      {
+        "source": "FDA_ARGOS",
+        "value": "Reference-grade genome from FDA ARGOS BioProject PRJNA231221"
+      }
+    ],
+    "st_evidence": [
+      {
+        "source": "Expected",
+        "value": "ST152"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": true,
+      "strain": "FDAARGOS_715",
+      "collection_date": "Unknown",
+      "isolation_source": "clinical isolate",
+      "submitter": "University of Ibadan"
+    },
+    "notes": "FDA ARGOS isolate FDAARGOS_715. Species Shigella sonnei from organism name. Serotype subtype not in metadata - ShigaTyper required for complete typing. ipaH gene must be present for Shigella confirmation."
+  },
+  "ground_truth": {
+    "species_confirmation": {
+      "species": "Shigella sonnei",
+      "ipaH_present": true,
+      "serogroup": "D"
+    },
+    "serological": {
+      "serotype": "Shigella sonnei (subtype TBD)",
+      "serogroup": "D"
+    },
+    "mlst": {
+      "scheme": "ecoli",
+      "sequence_type": "152",
+      "notes": "Shigella uses E. coli MLST scheme"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRS4857653",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRS4857653 && mv data/SRS4857653_1.fastq.gz data/reads_1.fq.gz && mv data/SRS4857653_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": "GCF_009729995.1",
+      "download_cmd": "datasets download genome accession GCF_009729995.1 --filename data/FDAARGOS_715.zip && unzip -j data/FDAARGOS_715.zip '*.fna' -d data/ && mv data/*.fna data/contigs.fa",
+      "notes": "FDA ARGOS reference assembly available"
+    }
+  },
+  "tools": {
+    "ShigaTyper": {
+      "input_type": "reads",
+      "run_cmd": "shigatyper --R1 data/reads_1.fq.gz --R2 data/reads_2.fq.gz --name FDAARGOS_715 > actual/shigatyper/result.tsv",
+      "reference_output": "expected/shigatyper/result.tsv"
+    },
+    "ipaH_detection": {
+      "input_type": "assembly",
+      "run_cmd": "blastn -query /path/to/ipaH.fasta -subject data/contigs.fa -outfmt 6 > actual/ipah_blast.tsv",
+      "reference_output": "expected/ipah_blast.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme ecoli data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "species_confirmation": "Expected species: Shigella sonnei. Tool must detect ipaH gene. Accept species-level match - serotype subtype determined by ShigaTyper.",
+    "mlst": "Expected ST152 (E. coli scheme)."
+  },
+  "difficulty": "common",
+  "notes": "FDA ARGOS Shigella sonnei isolate. S. sonnei is monomorphic (ST152 dominant). Run ShigaTyper to determine complete serotype."
+}

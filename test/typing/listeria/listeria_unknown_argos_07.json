@@ -1,0 +1,79 @@
+{
+  "organism": "Listeria monocytogenes",
+  "curation": {
+    "date": "2026-06-10",
+    "ncbi_accessions": {
+      "biosample": "SAMN06173364",
+      "sra": "SRS2108667",
+      "assembly": "GCA_002206565.1"
+    },
+    "metadata_confidence": "medium",
+    "serotype_evidence": [
+      {
+        "source": "Expected",
+        "value": "unknown - LisSero required"
+      },
+      {
+        "source": "FDA_ARGOS",
+        "value": "Reference-grade genome from FDA ARGOS BioProject PRJNA231221"
+      }
+    ],
+    "st_evidence": [
+      {
+        "source": "Expected",
+        "value": "ST unknown - determine with mlst"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": true,
+      "strain": "FDAARGOS_351",
+      "collection_date": "Missing",
+      "isolation_source": "liver tissue",
+      "host": "Wildlife",
+      "geo_loc": "Missing"
+    },
+    "notes": "FDA ARGOS isolate FDAARGOS_351. Serotype not in metadata - LisSero required for typing. High-quality reference genome. Source: liver tissue."
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "unknown",
+      "lineage": "unknown"
+    },
+    "mlst": {
+      "scheme": "lmonocytogenes",
+      "sequence_type": "unknown",
+      "clonal_complex": "unknown",
+      "notes": "Lineage inferred from ST"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRS2108667",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRS2108667 && mv data/SRS2108667_1.fastq.gz data/reads_1.fq.gz && mv data/SRS2108667_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": "GCA_002206565.1",
+      "download_cmd": "datasets download genome accession GCA_002206565.1 --filename data/FDAARGOS_351.zip && unzip -j data/FDAARGOS_351.zip '*.fna' -d data/ && mv data/*.fna data/contigs.fa",
+      "notes": "FDA ARGOS reference assembly available"
+    }
+  },
+  "tools": {
+    "LisSero": {
+      "input_type": "assembly",
+      "run_cmd": "lissero -i data/contigs.fa -o actual/lissero/ -t 4",
+      "reference_output": "expected/lissero/results.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme lmonocytogenes data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "serological": "Expected serotype TBD. Serotype not in metadata - LisSero determines ground truth. Accept exact serotype match or grouped variants (e.g., 4b/4d/4e).",
+    "mlst": "ST unknown - mlst determines ground truth. All 7 loci must type successfully. Document observed ST and infer lineage."
+  },
+  "difficulty": "medium",
+  "notes": "FDA ARGOS L. monocytogenes isolate. Source: liver tissue. Run LisSero and mlst to complete typing."
+}

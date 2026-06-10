@@ -1,0 +1,87 @@
+{
+  "organism": "Shigella flexneri",
+  "curation": {
+    "date": "2026-06-10",
+    "ncbi_accessions": {
+      "biosample": "SAMN11056407",
+      "sra": "SRS4849422",
+      "assembly": "GCF_013367815.1"
+    },
+    "metadata_confidence": "medium",
+    "serotype_evidence": [
+      {
+        "source": "BioSample.Organism.name",
+        "value": "Pathogen: clinical or host-associated sample from Shigella flexneri"
+      },
+      {
+        "source": "FDA_ARGOS",
+        "value": "Reference-grade genome from FDA ARGOS BioProject PRJNA231221"
+      }
+    ],
+    "st_evidence": [
+      {
+        "source": "Expected",
+        "value": "ST unknown - determine with mlst"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": true,
+      "strain": "FDAARGOS_692",
+      "collection_date": "Unknown",
+      "isolation_source": "clinical isolate",
+      "submitter": "University of Ibadan"
+    },
+    "notes": "FDA ARGOS isolate FDAARGOS_692. Species Shigella flexneri from organism name. Serotype subtype not in metadata - ShigaTyper required for complete typing. ipaH gene must be present for Shigella confirmation."
+  },
+  "ground_truth": {
+    "species_confirmation": {
+      "species": "Shigella flexneri",
+      "ipaH_present": true,
+      "serogroup": "B"
+    },
+    "serological": {
+      "serotype": "Shigella flexneri (subtype TBD)",
+      "serogroup": "B"
+    },
+    "mlst": {
+      "scheme": "ecoli",
+      "sequence_type": "unknown",
+      "notes": "Shigella uses E. coli MLST scheme"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRS4849422",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRS4849422 && mv data/SRS4849422_1.fastq.gz data/reads_1.fq.gz && mv data/SRS4849422_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": "GCF_013367815.1",
+      "download_cmd": "datasets download genome accession GCF_013367815.1 --filename data/FDAARGOS_692.zip && unzip -j data/FDAARGOS_692.zip '*.fna' -d data/ && mv data/*.fna data/contigs.fa",
+      "notes": "FDA ARGOS reference assembly available"
+    }
+  },
+  "tools": {
+    "ShigaTyper": {
+      "input_type": "reads",
+      "run_cmd": "shigatyper --R1 data/reads_1.fq.gz --R2 data/reads_2.fq.gz --name FDAARGOS_692 > actual/shigatyper/result.tsv",
+      "reference_output": "expected/shigatyper/result.tsv"
+    },
+    "ipaH_detection": {
+      "input_type": "assembly",
+      "run_cmd": "blastn -query /path/to/ipaH.fasta -subject data/contigs.fa -outfmt 6 > actual/ipah_blast.tsv",
+      "reference_output": "expected/ipah_blast.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme ecoli data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "species_confirmation": "Expected species: Shigella flexneri. Tool must detect ipaH gene. Accept species-level match - serotype subtype determined by ShigaTyper.",
+    "mlst": "ST unknown - mlst determines ground truth. Shigella flexneri has high ST diversity - document observed ST."
+  },
+  "difficulty": "medium",
+  "notes": "FDA ARGOS Shigella flexneri isolate. S. flexneri has high ST diversity (ST245, ST147, ST148 common). Run ShigaTyper to determine complete serotype."
+}

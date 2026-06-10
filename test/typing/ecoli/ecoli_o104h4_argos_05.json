@@ -1,0 +1,92 @@
+{
+  "organism": "Escherichia coli O104:H4",
+  "curation": {
+    "date": "2026-06-10",
+    "ncbi_accessions": {
+      "biosample": "SAMN07312447",
+      "sra": "SRS2393316",
+      "assembly": "GCF_002393365.1"
+    },
+    "metadata_confidence": "high",
+    "serotype_evidence": [
+      {
+        "source": "BioSample.Attributes.serotype",
+        "value": "O104:H4"
+      },
+      {
+        "source": "FDA_ARGOS",
+        "value": "Reference-grade genome from FDA ARGOS BioProject PRJNA231221"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": true,
+      "strain": "FDAARGOS_403",
+      "collection_date": "Missing",
+      "isolation_source": "human",
+      "host": "Homo sapiens",
+      "geo_loc": "Missing",
+      "collected_by": "USAMRIID < Columbia University"
+    },
+    "notes": "FDA ARGOS isolate FDAARGOS_403. Serotype O104:H4 confirmed in metadata. High-quality reference genome from FDA regulatory program."
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "O104:H4",
+      "o_antigen": "O104",
+      "h_antigen": "H4"
+    },
+    "mlst": {
+      "scheme": "ecoli",
+      "sequence_type": "678",
+      "notes": "ST678 expected"
+    },
+    "virulence": {
+      "expected_genes": [
+        "stx2",
+        "eae"
+      ],
+      "stec_confirmation": true
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRS2393316",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRS2393316 && mv data/SRS2393316_1.fastq.gz data/reads_1.fq.gz && mv data/SRS2393316_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": "GCF_002393365.1",
+      "download_cmd": "datasets download genome accession GCF_002393365.1 --filename data/FDAARGOS_403.zip && unzip -j data/FDAARGOS_403.zip '*.fna' -d data/ && mv data/*.fna data/contigs.fa",
+      "notes": "FDA ARGOS reference assembly available"
+    }
+  },
+  "tools": {
+    "ECTyper": {
+      "input_type": "assembly",
+      "run_cmd": "ectyper -i data/contigs.fa -o actual/ectyper/",
+      "reference_output": "expected/ectyper/output.tsv"
+    },
+    "SerotypeFinder": {
+      "input_type": "assembly",
+      "run_cmd": "serotypefinder.py -i data/contigs.fa -o actual/serotypefinder/ -d /path/to/serotypefinder_db",
+      "reference_output": "expected/serotypefinder/results_tab.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme ecoli data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    },
+    "ShigaToxinFinder": {
+      "input_type": "reads",
+      "run_cmd": "shigatoxinfinder.py -1 data/reads_1.fq.gz -2 data/reads_2.fq.gz -o actual/shigatoxin/",
+      "reference_output": "expected/shigatoxin/results.txt"
+    }
+  },
+  "validation_instructions": {
+    "serological": "Expected serotype O104:H4. Accept exact match or individual O/H antigen calls. Serotype confirmed in FDA ARGOS metadata.",
+    "mlst": "Expected ST678.",
+    "virulence": "Expected STEC virulence genes: stx2, eae. Accept PASS if stx and eae detected. PARTIAL if stx only."
+  },
+  "difficulty": "uncommon",
+  "notes": "FDA ARGOS O104:H4 isolate. Source: human. 2011 German outbreak strain lineage."
+}

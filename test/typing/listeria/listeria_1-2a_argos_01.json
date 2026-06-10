@@ -1,0 +1,79 @@
+{
+  "organism": "Listeria monocytogenes",
+  "curation": {
+    "date": "2026-06-10",
+    "ncbi_accessions": {
+      "biosample": "SAMN03255437",
+      "sra": "SRS891685",
+      "assembly": "GCF_001188045.1"
+    },
+    "metadata_confidence": "high",
+    "serotype_evidence": [
+      {
+        "source": "BioSample.Attributes.serotype",
+        "value": "1/2a"
+      },
+      {
+        "source": "FDA_ARGOS",
+        "value": "Reference-grade genome from FDA ARGOS BioProject PRJNA231221"
+      }
+    ],
+    "st_evidence": [
+      {
+        "source": "Expected",
+        "value": "ST7"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": true,
+      "strain": "FDAARGOS_57",
+      "collection_date": "2002-07-16",
+      "isolation_source": "water",
+      "host": "Environment",
+      "geo_loc": "USA: NY"
+    },
+    "notes": "FDA ARGOS isolate FDAARGOS_57. Serotype 1/2a confirmed in metadata. High-quality reference genome. Source: water."
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "1/2a",
+      "lineage": "II"
+    },
+    "mlst": {
+      "scheme": "lmonocytogenes",
+      "sequence_type": "7",
+      "clonal_complex": "CC7",
+      "notes": "Lineage inferred from ST"
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRS891685",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRS891685 && mv data/SRS891685_1.fastq.gz data/reads_1.fq.gz && mv data/SRS891685_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": "GCF_001188045.1",
+      "download_cmd": "datasets download genome accession GCF_001188045.1 --filename data/FDAARGOS_57.zip && unzip -j data/FDAARGOS_57.zip '*.fna' -d data/ && mv data/*.fna data/contigs.fa",
+      "notes": "FDA ARGOS reference assembly available"
+    }
+  },
+  "tools": {
+    "LisSero": {
+      "input_type": "assembly",
+      "run_cmd": "lissero -i data/contigs.fa -o actual/lissero/ -t 4",
+      "reference_output": "expected/lissero/results.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme lmonocytogenes data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    }
+  },
+  "validation_instructions": {
+    "serological": "Expected serotype 1/2a. Serotype confirmed in FDA ARGOS metadata. Accept exact serotype match or grouped variants (e.g., 4b/4d/4e).",
+    "mlst": "Expected ST7 (lmonocytogenes scheme). "
+  },
+  "difficulty": "common",
+  "notes": "FDA ARGOS L. monocytogenes isolate. Serotype 1/2a (Lineage II). Source: water. Run LisSero and mlst to complete typing."
+}

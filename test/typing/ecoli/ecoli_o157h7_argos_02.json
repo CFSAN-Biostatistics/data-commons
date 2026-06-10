@@ -1,0 +1,94 @@
+{
+  "organism": "Escherichia coli O157:H7",
+  "curation": {
+    "date": "2026-06-10",
+    "ncbi_accessions": {
+      "biosample": "SAMN07312442",
+      "sra": "SRS2393287",
+      "assembly": "GCF_002554475.1"
+    },
+    "metadata_confidence": "high",
+    "serotype_evidence": [
+      {
+        "source": "BioSample.Attributes.serotype",
+        "value": "O157:H7"
+      },
+      {
+        "source": "FDA_ARGOS",
+        "value": "Reference-grade genome from FDA ARGOS BioProject PRJNA231221"
+      }
+    ],
+    "quality_metrics": {
+      "has_reads": true,
+      "has_assembly": true,
+      "strain": "FDAARGOS_398",
+      "collection_date": "Missing",
+      "isolation_source": "human",
+      "host": "Homo sapiens",
+      "geo_loc": "Missing",
+      "collected_by": "USAMRIID"
+    },
+    "notes": "FDA ARGOS isolate FDAARGOS_398. Serotype O157:H7 confirmed in metadata. High-quality reference genome from FDA regulatory program."
+  },
+  "ground_truth": {
+    "serological": {
+      "serotype": "O157:H7",
+      "o_antigen": "O157",
+      "h_antigen": "H7"
+    },
+    "mlst": {
+      "scheme": "ecoli",
+      "sequence_type": "11",
+      "notes": "ST11 expected"
+    },
+    "virulence": {
+      "expected_genes": [
+        "stx1",
+        "stx2",
+        "eae",
+        "ehxA"
+      ],
+      "stec_confirmation": true
+    }
+  },
+  "data_sources": {
+    "reads": {
+      "sra_accession": "SRS2393287",
+      "download_cmd": "fasterq-dump --gzip --outdir data/ SRS2393287 && mv data/SRS2393287_1.fastq.gz data/reads_1.fq.gz && mv data/SRS2393287_2.fastq.gz data/reads_2.fq.gz"
+    },
+    "assembly": {
+      "accession": "GCF_002554475.1",
+      "download_cmd": "datasets download genome accession GCF_002554475.1 --filename data/FDAARGOS_398.zip && unzip -j data/FDAARGOS_398.zip '*.fna' -d data/ && mv data/*.fna data/contigs.fa",
+      "notes": "FDA ARGOS reference assembly available"
+    }
+  },
+  "tools": {
+    "ECTyper": {
+      "input_type": "assembly",
+      "run_cmd": "ectyper -i data/contigs.fa -o actual/ectyper/",
+      "reference_output": "expected/ectyper/output.tsv"
+    },
+    "SerotypeFinder": {
+      "input_type": "assembly",
+      "run_cmd": "serotypefinder.py -i data/contigs.fa -o actual/serotypefinder/ -d /path/to/serotypefinder_db",
+      "reference_output": "expected/serotypefinder/results_tab.tsv"
+    },
+    "MLST": {
+      "input_type": "assembly",
+      "run_cmd": "mlst --scheme ecoli data/contigs.fa > actual/mlst/mlst_report.tsv",
+      "reference_output": "expected/mlst/mlst_report.tsv"
+    },
+    "ShigaToxinFinder": {
+      "input_type": "reads",
+      "run_cmd": "shigatoxinfinder.py -1 data/reads_1.fq.gz -2 data/reads_2.fq.gz -o actual/shigatoxin/",
+      "reference_output": "expected/shigatoxin/results.txt"
+    }
+  },
+  "validation_instructions": {
+    "serological": "Expected serotype O157:H7. Accept exact match or individual O/H antigen calls. Serotype confirmed in FDA ARGOS metadata.",
+    "mlst": "Expected ST11.",
+    "virulence": "Expected STEC virulence genes: stx1, stx2, eae, ehxA. Accept PASS if stx and eae detected. PARTIAL if stx only."
+  },
+  "difficulty": "common",
+  "notes": "FDA ARGOS O157:H7 isolate. Source: human."
+}

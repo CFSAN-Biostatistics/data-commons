@@ -1,0 +1,46 @@
+{
+  "id": "T9c",
+  "name": "chr21",
+  "organism": "Homo sapiens",
+  "strain_assembly": "GRCh38.p14 chr21 (NC_000021.9)",
+  "target_type": "real_genome",
+  "tier": 1,
+  "key_challenge": "Repeat-rich 47 Mb reference; stresses chaining, locus dedup and index size",
+  "size_approx": "46.7 Mb",
+  "genome_size_bp": 46709983,
+  "length_bp": 46709983,
+  "gc_percent": 40.94,
+  "ploidy": "diploid",
+  "chromosomes": 1,
+  "reference": {
+    "refseq": "NC_000021.9",
+    "genbank": "CM000683.2",
+    "assembly": "GCF_000001405.40",
+    "download": {
+      "tool": "curl",
+      "command": "curl -fsS \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NC_000021.9&rettype=fasta&retmode=text\" -o reference.fasta"
+    },
+    "notes": "6,621,361 N bases (assembly gaps, incl. the p-arm). The simulator redraws any fragment containing a non-ACGT base, so no read spans a gap."
+  },
+  "simulation": {
+    "tool": "gen_long_reads.py",
+    "command": "python3 {benchmark_dir}/scripts/gen_long_reads.py --reference ../reference/reference.fasta --reads-out reads_1.fq --seed {seed} --num-reads 2000 --min-len 10000 --max-len 50000 --read-error 0.12 --indel-frac 0.7",
+    "reads_file": "reads_1.fq",
+    "layout": "single",
+    "seed": 9103,
+    "num_reads": 2000,
+    "read_length_bp": "10000-50000",
+    "read_error": 0.12,
+    "indel_fraction": 0.7,
+    "notes": "read_error is the per-base error-EVENT rate (substitutions + indel events); indel events average ~2 bp, so base-level edit divergence is ~1.7x the stated value."
+  },
+  "truth": {
+    "simulated": "reads_1.fq.truth.tsv beside the reads: read_id chrom true_start strand true_end n_subs n_ins n_del indel_events. true_start is the 0-based leftmost reference coordinate; true_end is half-open. Score placement within +/-100 bp (long_read_accuracy.py)."
+  },
+  "benchmark_notes": "Reference is a single chromosome, so off-target mismapping to the rest of the genome is NOT exercised (unlike T1).",
+  "alphabet": "long-read",
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-10-21"
+  }
+}

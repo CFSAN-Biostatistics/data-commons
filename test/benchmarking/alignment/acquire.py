@@ -21,6 +21,8 @@ Workflow per target:
   5. If --giab and target is T1: download GIAB real reads.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import os
@@ -109,8 +111,14 @@ def run_command(cmd: str, cwd: Path, label: str) -> bool:
     return True
 
 
-def substitute_globals(cmd: str, global_cfg: dict) -> str:
-    return cmd.replace("{rng_seed}", str(global_cfg["rng_seed"]))
+def substitute_globals(cmd: str, global_cfg: dict, section: dict | None = None) -> str:
+    """Expand {rng_seed} (global.json), {benchmark_dir}, and {seed} (the manifest
+    section's own fixed `seed`, for targets that must not share the global seed)."""
+    cmd = cmd.replace("{rng_seed}", str(global_cfg["rng_seed"]))
+    cmd = cmd.replace("{benchmark_dir}", str(BENCHMARK_DIR))
+    if section and "seed" in section:
+        cmd = cmd.replace("{seed}", str(section["seed"]))
+    return cmd
 
 
 def acquire_reference(manifest: dict, target_dir: Path, force: bool, global_cfg: dict) -> bool:
@@ -171,7 +179,7 @@ def acquire_construction(manifest: dict, target_dir: Path, force: bool,
     for cmd in commands:
         if not cmd:
             continue
-        cmd = substitute_globals(cmd, global_cfg)
+        cmd = substitute_globals(cmd, global_cfg, construction)
         if not run_command(cmd, ref_dir, "construction"):
             return False
     return True
@@ -189,7 +197,7 @@ def acquire_simulation(manifest: dict, target_dir: Path, force: bool,
         return False
 
     reads_dir = target_dir / "data" / "reads"
-    r1 = reads_dir / "reads_1.fastq.gz"
+    r1 = reads_dir / sim_cfg.get("reads_file", "reads_1.fastq.gz")
     if r1.exists() and not force:
         log(f"  simulation: reads already present, skipping")
         return True
@@ -205,8 +213,29 @@ def acquire_simulation(manifest: dict, target_dir: Path, force: bool,
         log("  simulation: no command specified — skipping")
         return True
 
-    cmd = substitute_globals(cmd, global_cfg)
+    cmd = substitute_globals(cmd, global_cfg, sim_cfg)
     return run_command(cmd, reads_dir, "simulation")
+
+
+def acquire_auto_real_reads(manifest: dict, target_dir: Path, force: bool, global_cfg: dict) -> bool:
+    """Download real reads for targets whose real_reads object sets auto_acquire
+    (long-read real-data targets). GIAB (T1) is handled separately via --giab."""
+    real_reads = manifest.get("real_reads", {})
+    if not real_reads.get("auto_acquire"):
+        return True
+
+    reads_dir = target_dir / "data" / "reads"
+    out = reads_dir / real_reads.get("reads_file", "reads_1.fq")
+    if out.exists() and not force:
+        log(f"  real reads: {out} already present, skipping")
+        return True
+
+    cmd = real_reads.get("download", {}).get("command", "")
+    if not cmd:
+        log("  real reads: no download command — skipping")
+        return True
+    reads_dir.mkdir(parents=True, exist_ok=True)
+    return run_command(substitute_globals(cmd, global_cfg, real_reads), reads_dir, "real reads download")
 
 
 def acquire_giab(manifest: dict, target_dir: Path, force: bool) -> bool:
@@ -266,6 +295,8 @@ def process_target(manifest_path: Path, args, global_cfg: dict,
             log(f"  {target_id}: reference download failed or skipped")
 
     acquire_simulation(manifest, target_dir, args.force, global_cfg, missing_simulation)
+
+    acquire_auto_real_reads(manifest, target_dir, args.force, global_cfg)
 
     if args.giab and target_id == "T1":
         acquire_giab(manifest, target_dir, args.force)

@@ -1,0 +1,46 @@
+{
+  "organism": "Escherichia coli",
+  "strain_assembly": "K-12 substr. MG1655 (NC_000913.3)",
+  "target_type": "real_genome",
+  "tier": 1,
+  "size_approx": "4.64 Mb",
+  "genome_size_bp": 4641652,
+  "length_bp": 4641652,
+  "gc_percent": 50.79,
+  "ploidy": "haploid",
+  "chromosomes": 1,
+  "reference": {
+    "refseq": "NC_000913.3",
+    "genbank": "U00096.3",
+    "assembly": "GCF_000005845.2",
+    "download": {
+      "tool": "curl",
+      "command": "curl -fsS \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NC_000913.3&rettype=fasta&retmode=text\" -o reference.fasta"
+    }
+  },
+  "id": "T9a-n10000",
+  "name": "k12_mg1655_n10000",
+  "sweep_of": "T9a",
+  "key_challenge": "Read-count sweep point (10000 reads) to measure amortization of the fixed plan/index cost",
+  "simulation": {
+    "tool": "gen_long_reads.py",
+    "command": "python3 {benchmark_dir}/scripts/gen_long_reads.py --reference ../reference/reference.fasta --reads-out reads_1.fq --seed {seed} --num-reads 10000 --min-len 10000 --max-len 30000 --read-error 0.12 --indel-frac 0.7",
+    "reads_file": "reads_1.fq",
+    "layout": "single",
+    "seed": 9101,
+    "num_reads": 10000,
+    "read_length_bp": "10000-30000",
+    "read_error": 0.12,
+    "indel_fraction": 0.7,
+    "notes": "Same seed and parameters as T9a: reads are generated sequentially, so this set is an exact prefix (or, for 10,000, a superset) of T9a's reads."
+  },
+  "truth": {
+    "simulated": "reads_1.fq.truth.tsv beside the reads: read_id chrom true_start strand true_end n_subs n_ins n_del indel_events. true_start is the 0-based leftmost reference coordinate; true_end is half-open. Score placement within +/-100 bp (long_read_accuracy.py)."
+  },
+  "benchmark_notes": "Run phraya and minimap2 at all four read counts (100/500/2000/10000) and compare wall-time growth, not absolute time.",
+  "alphabet": "long-read",
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-10-21"
+  }
+}

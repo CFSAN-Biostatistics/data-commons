@@ -135,6 +135,33 @@ The `{rng_seed}` placeholder is substituted from `global.json`.
 Output convention: `reads_1.fastq.gz` and `reads_2.fastq.gz` (paired-end).
 Single-end simulators produce `reads_1.fastq.gz` only.
 
+### Long-read targets (`alphabet: "long-read"`, T9 series)
+
+Long-read targets add these fields. They are consumed by the phraya SLURM harness
+(`ALPHABET=long-read`), which expects `data/reference/reference.fasta`, an
+**uncompressed** `data/reads/reads_1.fq`, and `data/reads/reads_1.fq.truth.tsv`.
+
+| Field | Where | Description |
+|---|---|---|
+| `alphabet` | top level | `long-read` |
+| `sweep_of` | top level | ID of the parent target when this is a read-count sweep point |
+| `reads_file` | `simulation`, `real_reads` | Output name under `data/reads/` (default `reads_1.fastq.gz`; long-read targets use `reads_1.fq`). Used for the skip-if-present check |
+| `seed` | `simulation`, `construction`, `real_reads` | Fixed per-target seed substituted for `{seed}` in the command. Long-read targets use their own seed, not `global.json`'s |
+| `num_reads`, `read_length_bp`, `read_error`, `indel_fraction` | `simulation` | Documentation of the arguments in `command` (the command is authoritative) |
+
+`{benchmark_dir}` in any command expands to this directory, so commands can call `scripts/`.
+
+`scripts/gen_long_reads.py` simulates reads from the downloaded reference and writes
+the truth TSV (`read_id chrom true_start strand true_end n_subs n_ins n_del indel_events`;
+`true_start` 0-based, `true_end` half-open). Output is a pure function of reference,
+arguments and seed; reads are generated sequentially, so a smaller `--num-reads` with
+the same seed yields a prefix of the larger set (the T9a read-count sweep relies on this).
+`read_error` is the per-base error-*event* rate; with indel events averaging ~2 bp, base-level
+divergence is about 1.7x that value.
+
+`real_reads.auto_acquire: true` makes `acquire.py` download real reads without a flag
+(T9g). Real-read targets have no truth TSV.
+
 ---
 
 ## `real_reads` Object (T1 only)

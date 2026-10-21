@@ -1,0 +1,49 @@
+{
+  "organism": "Escherichia coli",
+  "strain_assembly": "K-12 substr. MG1655 (NC_000913.3) + planted 20 kb segmental duplication",
+  "size_approx": "4.66 Mb",
+  "genome_size_bp": 4661658,
+  "length_bp": 4661658,
+  "gc_percent": 50.79,
+  "ploidy": "haploid",
+  "chromosomes": 1,
+  "id": "T9f",
+  "name": "k12_mg1655_segdup",
+  "target_type": "synthetic",
+  "tier": 2,
+  "key_challenge": "Multi-mapping and locus-dedup correctness: a 20 kb repeat pair at 99.0% identity inside a natural genome",
+  "construction": {
+    "tools_required": [
+      "python3"
+    ],
+    "seed": 9106,
+    "description": "Copy MG1655[1,500,000:1,520,000) (copy A), mutate to 99.0% identity (10% of changes single-base indels), insert at original coordinate 3,200,000 (copy B). Coordinates of both copies in the new reference are written to segdup_truth.bed.",
+    "commands": [
+      "curl -fsS \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NC_000913.3&rettype=fasta&retmode=text\" -o base.fasta",
+      "python3 {benchmark_dir}/scripts/build_embedded_segdup.py --ref base.fasta --src-start 1500000 --length 20000 --insert-at 3200000 --identity 99.0 --seed {seed} --out reference.fasta --truth-bed segdup_truth.bed && rm base.fasta"
+    ],
+    "truth_bed": "data/reference/segdup_truth.bed"
+  },
+  "simulation": {
+    "tool": "gen_long_reads.py",
+    "command": "python3 {benchmark_dir}/scripts/gen_long_reads.py --reference ../reference/reference.fasta --reads-out reads_1.fq --seed {seed} --num-reads 1000 --min-len 8000 --max-len 20000 --read-error 0.12 --indel-frac 0.7 --region-bed ../reference/segdup_truth.bed",
+    "reads_file": "reads_1.fq",
+    "layout": "single",
+    "seed": 9106,
+    "num_reads": 1000,
+    "read_length_bp": "8000-20000",
+    "read_error": 0.12,
+    "indel_fraction": 0.7,
+    "notes": "Every read overlaps copy A or copy B. read_error is the per-base error-EVENT rate (substitutions + indel events); indel events average ~2 bp, so base-level edit divergence is ~1.7x the stated value."
+  },
+  "truth": {
+    "simulated": "reads_1.fq.truth.tsv beside the reads: read_id chrom true_start strand true_end n_subs n_ins n_del indel_events. true_start is the 0-based leftmost reference coordinate; true_end is half-open. Score placement within +/-100 bp (long_read_accuracy.py).",
+    "segdup": "data/reference/segdup_truth.bed gives both copies. A read is simulated from exactly one copy (see reads_1.fq.truth.tsv) but a read lying wholly inside the repeat is a 99%-identity tie between the copies by design."
+  },
+  "benchmark_notes": "PA is ambiguous here by design. Report correct_any (either copy) and per-locus recall, not PA alone. Reads that overhang the repeat into unique flank are placeable and form the unambiguous subset.",
+  "alphabet": "long-read",
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-10-21"
+  }
+}

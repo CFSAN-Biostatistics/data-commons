@@ -83,6 +83,13 @@ test/benchmarking/alignment/
 | S3 | Synthetic | Divergent haplotype | Read dropout at 1–8% divergence |
 | S4 | Synthetic | NUMT trap | Mitochondrial reads misrouted to nuclear insertions |
 | S5 | Synthetic | SV breakpoint gauntlet | Clip vs. split vs. mismap at dense breakpoints |
+| T9a | *Escherichia coli* | K-12 MG1655 (NC_000913.3) | Long reads: 2,000 sim. reads, 10–30 kb, 12% error. `T9a-n100/n500/n10000` are read-count sweep points |
+| T9b | *Escherichia coli* | O157:H7 Sakai chromosome (NC_002695.2) | Long reads: 8% error, prophage/IS repeats |
+| T9c | *Homo sapiens* | GRCh38 chr21 | Long reads: 10–50 kb, repeat-rich 47 Mb reference |
+| T9d | *Escherichia coli* | K-12 MG1655 | Ultra-long reads (50–100 kb) |
+| T9e | *Escherichia coli* | K-12 MG1655 | High-error long reads (18%) |
+| T9f | *Escherichia coli* | K-12 MG1655 + planted 20 kb segdup (99.0%) | Multi-mapping / locus dedup; PA ambiguous by design |
+| T9g | *Escherichia coli* | K-12 MG1655 | Real ONT reads (SRR8184499, first 10,000), no truth; speed/RSS/agreement only |
 
 ### Metric glossary
 

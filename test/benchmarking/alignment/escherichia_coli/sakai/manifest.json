@@ -1,0 +1,45 @@
+{
+  "id": "T9b",
+  "name": "sakai",
+  "organism": "Escherichia coli",
+  "strain_assembly": "O157:H7 str. Sakai chromosome (NC_002695.2)",
+  "target_type": "real_genome",
+  "tier": 1,
+  "key_challenge": "Lower-error regime (8%, HiFi-polished-like); second bacterial genome with prophage/IS repeat content",
+  "size_approx": "5.50 Mb",
+  "genome_size_bp": 5498578,
+  "length_bp": 5498578,
+  "gc_percent": 50.54,
+  "ploidy": "haploid",
+  "chromosomes": 1,
+  "reference": {
+    "refseq": "NC_002695.2",
+    "assembly": "GCF_000008865.2",
+    "download": {
+      "tool": "curl",
+      "command": "curl -fsS \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NC_002695.2&rettype=fasta&retmode=text\" -o reference.fasta"
+    },
+    "notes": "Chromosome only; plasmids pO157 (NC_002128) and pOSAK1 are excluded."
+  },
+  "simulation": {
+    "tool": "gen_long_reads.py",
+    "command": "python3 {benchmark_dir}/scripts/gen_long_reads.py --reference ../reference/reference.fasta --reads-out reads_1.fq --seed {seed} --num-reads 2000 --min-len 10000 --max-len 30000 --read-error 0.08 --indel-frac 0.7",
+    "reads_file": "reads_1.fq",
+    "layout": "single",
+    "seed": 9102,
+    "num_reads": 2000,
+    "read_length_bp": "10000-30000",
+    "read_error": 0.08,
+    "indel_fraction": 0.7,
+    "notes": "read_error is the per-base error-EVENT rate (substitutions + indel events); indel events average ~2 bp, so base-level edit divergence is ~1.7x the stated value."
+  },
+  "truth": {
+    "simulated": "reads_1.fq.truth.tsv beside the reads: read_id chrom true_start strand true_end n_subs n_ins n_del indel_events. true_start is the 0-based leftmost reference coordinate; true_end is half-open. Score placement within +/-100 bp (long_read_accuracy.py)."
+  },
+  "benchmark_notes": "Sakai carries ~18 prophages and many IS elements, so it has more intragenomic repeats than MG1655.",
+  "alphabet": "long-read",
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-10-21"
+  }
+}

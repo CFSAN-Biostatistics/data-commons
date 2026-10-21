@@ -1,0 +1,45 @@
+{
+  "organism": "Escherichia coli",
+  "strain_assembly": "K-12 substr. MG1655 (NC_000913.3)",
+  "target_type": "real_genome",
+  "tier": 1,
+  "size_approx": "4.64 Mb",
+  "genome_size_bp": 4641652,
+  "length_bp": 4641652,
+  "gc_percent": 50.79,
+  "ploidy": "haploid",
+  "chromosomes": 1,
+  "reference": {
+    "refseq": "NC_000913.3",
+    "genbank": "U00096.3",
+    "assembly": "GCF_000005845.2",
+    "download": {
+      "tool": "curl",
+      "command": "curl -fsS \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NC_000913.3&rettype=fasta&retmode=text\" -o reference.fasta"
+    }
+  },
+  "id": "T9e",
+  "name": "k12_mg1655_higherr",
+  "key_challenge": "High-error stress (18%): one locus fragments into many short chains",
+  "simulation": {
+    "tool": "gen_long_reads.py",
+    "command": "python3 {benchmark_dir}/scripts/gen_long_reads.py --reference ../reference/reference.fasta --reads-out reads_1.fq --seed {seed} --num-reads 2000 --min-len 10000 --max-len 30000 --read-error 0.18 --indel-frac 0.7",
+    "reads_file": "reads_1.fq",
+    "layout": "single",
+    "seed": 9105,
+    "num_reads": 2000,
+    "read_length_bp": "10000-30000",
+    "read_error": 0.18,
+    "indel_fraction": 0.7,
+    "notes": "read_error is the per-base error-EVENT rate (substitutions + indel events); indel events average ~2 bp, so base-level edit divergence is ~1.7x the stated value. 0.18 is the midpoint of the 15-20% range in the handoff."
+  },
+  "truth": {
+    "simulated": "reads_1.fq.truth.tsv beside the reads: read_id chrom true_start strand true_end n_subs n_ins n_del indel_events. true_start is the 0-based leftmost reference coordinate; true_end is half-open. Score placement within +/-100 bp (long_read_accuracy.py)."
+  },
+  "benchmark_notes": "Compare unmapped fraction and PA against T9a; expect both to degrade, and look for a cliff rather than a slope.",
+  "alphabet": "long-read",
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-10-21"
+  }
+}

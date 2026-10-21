@@ -1,0 +1,60 @@
+{
+  "organism": "Escherichia coli",
+  "strain_assembly": "K-12 substr. MG1655 (NC_000913.3)",
+  "target_type": "real_genome",
+  "tier": 1,
+  "size_approx": "4.64 Mb",
+  "genome_size_bp": 4641652,
+  "length_bp": 4641652,
+  "gc_percent": 50.79,
+  "ploidy": "haploid",
+  "chromosomes": 1,
+  "reference": {
+    "refseq": "NC_000913.3",
+    "genbank": "U00096.3",
+    "assembly": "GCF_000005845.2",
+    "download": {
+      "tool": "curl",
+      "command": "curl -fsS \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NC_000913.3&rettype=fasta&retmode=text\" -o reference.fasta"
+    }
+  },
+  "id": "T9g",
+  "name": "k12_mg1655_real_ont",
+  "key_challenge": "Real ONT error structure (homopolymers, chimeras, adapter remnants, length tail) that simulation cannot reproduce",
+  "real_reads": {
+    "auto_acquire": true,
+    "reads_file": "reads_1.fq",
+    "layout": "single",
+    "platform": "Oxford Nanopore MinION (ENA instrument model: MinION)",
+    "run": "SRR8184499",
+    "experiment": "MinION sequencing: WGS ecoli:ONT",
+    "bioproject": "PRJNA504496",
+    "biosample": "SAMN10412258",
+    "study": "Error correction tool benchmark",
+    "submitter_center": "SUB4782735",
+    "full_run": {
+      "reads": 58221,
+      "bases": 524330535,
+      "fastq_gz_bytes": 402574534,
+      "fastq_gz_md5": "7f66e3f7e54a0f0665e8426f6409b631",
+      "url": "https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR818/009/SRR8184499/SRR8184499_1.fastq.gz"
+    },
+    "subsample": {
+      "reads": 10000,
+      "method": "first 10,000 records of the ENA fastq (deterministic; ~90 Mb, ~19x of MG1655)"
+    },
+    "download": {
+      "tool": "curl",
+      "command": "curl -fsS https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR818/009/SRR8184499/SRR8184499_1.fastq.gz | gzip -dc | head -n 40000 > reads_1.fq"
+    }
+  },
+  "truth": {
+    "none": "Real reads: no ground-truth placement and no truth TSV. Use for wall time, peak RSS and phraya-vs-minimap2 placement agreement only."
+  },
+  "benchmark_notes": "Do not report PA. SRR8184499 was chosen as a single-run, single-end MG1655 ONT WGS set of manageable size (402 MB gz). Confirm on staging that >=95% of reads map to NC_000913.3 with minimap2 -x map-ont before using.",
+  "alphabet": "long-read",
+  "curation": {
+    "curator": "Justin Payne",
+    "date": "2026-10-21"
+  }
+}

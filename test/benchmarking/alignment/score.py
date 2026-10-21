@@ -62,14 +62,19 @@ mixing long-read and other alphabets in one file is an error. Differences from s
       non-positive "mcs" is ignored rather than zeroing the score; "va" is used if present).
       A target with "pa": null (e.g. real reads with no truth) is excluded from CAS but still
       counts toward BNT and MEI.
-    - PA tolerance comes from each target's "pa_tolerance_bp" (the scorer used upstream);
-      --tolerance is not used.
+    - "pa" is placement accuracy at the locus tolerance "pa_tolerance_bp" (2000 bp from the harness):
+      the best placement's START is within that distance of the true start. CAS uses it. A tight
+      start test (100 bp) also penalises soft-clipped read ends, so it is reported separately as
+      "pa_start_100bp" and is not part of CAS. --tolerance is not used.
     - Targets with "sweep_of" (read-count sweep points) are excluded from the aggregate
       CAS/BNT/MEI and reported in a separate amortization table.
     - "wall_time_s" is the aligner step only; "plan_time_s" (phraya plan, the index-build
       analogue) is reported but not part of BNT.
     Optional long-read target fields: bases_per_s, plan_time_s, precision, n_truth,
-    n_correct_any, wall_cv_pct, unaligned_frac, pa_tolerance_bp, sweep_of.
+    n_correct_any, wall_cv_pct, unaligned_frac, pa_tolerance_bp, pa_start_100bp, sweep_of;
+    planted-repeat targets: n_repeat_inside, n_repeat_both_copies, n_overhang, n_overhang_correct;
+    no-truth targets: agree_frac, n_both, n_agree, n_only_this, n_only_ref (agreement of the
+    aligner's best placement with minimap2-ont's primary placement).
 """
 
 import argparse
@@ -107,6 +112,8 @@ def compute_cbs(cas: float, bnt_norm: float, alpha: float) -> float:
 LONG_READ_DETAIL_KEYS = (
     "reads", "wall_time_s", "plan_time_s", "peak_rss_gb", "unaligned_frac", "precision",
     "n_truth", "n_correct_any", "bases_per_s", "wall_cv_pct", "pa_tolerance_bp", "genome_size_gb",
+    "pa_start_100bp", "pa_start_tolerance_bp", "agree_frac", "n_both", "n_agree", "n_only_this",
+    "n_only_ref", "n_repeat_inside", "n_repeat_both_copies", "n_overhang", "n_overhang_correct",
 )
 
 
@@ -363,7 +370,7 @@ def print_long_read_results(results: list[dict], platform: dict, alpha: float,
         print(f"Platform:      {cpu}")
     print(f"STREAM Triad:  {bw} GB/s  |  Threads: {threads}")
     print(f"α = {alpha:.2f}  |  PA tolerance: {tol_str} (set upstream; --tolerance is not used)")
-    print("CAS = geometric mean of PA over scored primary targets (MCS/VA not implemented for long reads)")
+    print("CAS = geometric mean of PA (locus tolerance above) over scored primary targets (MCS/VA not implemented for long reads)")
     print("BNT = bases / (wall × threads) / STREAM GB/s  [b/t·GB]. wall = aligner step only;")
     print("      phraya plan_time_s (read + reference sketching) is shown below, not included in BNT.\n")
 
@@ -403,7 +410,7 @@ def print_long_read_results(results: list[dict], platform: dict, alpha: float,
 
     print("\nPer-target detail (wall = aligner step; plan = phraya plan; Mb/s = input bases per wall second):")
     dh = (f"{'Target':<10}{'Aligner':<{col_w}}{'reads':>8}{'wall_s':>9}{'cv%':>7}{'plan_s':>9}"
-          f"{'RSS_GB':>9}{'unal':>8}{'Mb/s':>8}{'PA':>8}{'prec':>8}")
+          f"{'RSS_GB':>9}{'unal':>8}{'Mb/s':>8}{'PA':>8}{'PA@100':>8}{'prec':>8}")
     print(dh)
     print("-" * len(dh))
     for tid in primary_ids:
@@ -416,7 +423,30 @@ def print_long_read_results(results: list[dict], platform: dict, alpha: float,
                   f"{(td.get('reads') or 0):>8d}{fmt(td.get('wall_time_s'), 9, 2)}{fmt(td.get('wall_cv_pct'), 7, 1)}"
                   f"{fmt(td.get('plan_time_s'), 9, 2)}{fmt(td.get('peak_rss_gb'), 9, 3)}"
                   f"{fmt(td.get('unaligned_frac'), 8, 4)}{fmt(mbs, 8, 2)}"
-                  f"{fmt(td['pa'], 8, 4)}{fmt(td.get('precision'), 8, 4)}")
+                  f"{fmt(td['pa'], 8, 4)}{fmt(td.get('pa_start_100bp'), 8, 4)}{fmt(td.get('precision'), 8, 4)}")
+
+    rep = [(r, td) for r in ranked for td in r["target_details"] if td.get("n_repeat_inside") is not None]
+    if rep:
+        print("\nPlanted-repeat targets (PA is ambiguous by design; correct_any = either copy counts):")
+        rh = (f"{'Target':<10}{'Aligner':<{col_w}}{'PA':>8}{'any/truth':>12}{'both/inside':>13}{'overhang ok':>13}")
+        print(rh)
+        print("-" * len(rh))
+        for r, td in rep:
+            n = td.get("n_truth") or 0
+            anyf = f"{td['n_correct_any']}/{n}" if td.get("n_correct_any") is not None else "-"
+            print(f"{td['id']:<10}{r['name']:<{col_w}}{fmt(td['pa'], 8, 4)}{anyf:>12}"
+                  f"{str(td['n_repeat_both_copies']) + '/' + str(td['n_repeat_inside']):>13}"
+                  f"{str(td['n_overhang_correct']) + '/' + str(td['n_overhang']):>13}")
+
+    agr = [(r, td) for r in ranked for td in r["target_details"] if td.get("agree_frac") is not None]
+    if agr:
+        print("\nNo-truth targets: agreement of best placement with minimap2-ont's primary (never PA):")
+        ah = f"{'Target':<10}{'Aligner':<{col_w}}{'both':>8}{'agree':>8}{'frac':>8}{'only_this':>11}{'only_ont':>10}"
+        print(ah)
+        print("-" * len(ah))
+        for r, td in agr:
+            print(f"{td['id']:<10}{r['name']:<{col_w}}{td['n_both']:>8d}{td['n_agree']:>8d}"
+                  f"{fmt(td['agree_frac'], 8, 4)}{td['n_only_this']:>11d}{td['n_only_ref']:>10d}")
 
     sweeps = [td for td in all_td if td.get("sweep_of")]
     if sweeps:
@@ -427,7 +457,8 @@ def print_long_read_results(results: list[dict], platform: dict, alpha: float,
         print("-" * len(sh))
         for parent in sorted({td["sweep_of"] for td in sweeps}):
             for r in ranked:
-                pts = sorted((td for td in r["target_details"] if td.get("sweep_of") == parent),
+                pts = sorted((td for td in r["target_details"]
+                              if td.get("sweep_of") == parent or td["id"] == parent),
                              key=lambda td: td.get("reads") or 0)
                 for td in pts:
                     n, wall, plan = td.get("reads") or 0, td.get("wall_time_s"), td.get("plan_time_s")

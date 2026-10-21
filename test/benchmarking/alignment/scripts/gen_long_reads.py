@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import os
 import random
 import re
 import sys
@@ -164,7 +165,9 @@ def main() -> None:
     rng = random.Random(args.seed)
     truth_path = f"{args.reads_out}.truth.tsv"
     qual_char = "?"
-    with open(args.reads_out, "w") as fq, open(truth_path, "w") as tr:
+    # Write to .part files and rename on success so an interrupted run never leaves a
+    # truncated reads file that acquire.py would treat as present.
+    with open(args.reads_out + ".part", "w") as fq, open(truth_path + ".part", "w") as tr:
         tr.write("read_id\tchrom\ttrue_start\tstrand\ttrue_end\tn_subs\tn_ins\tn_del\tindel_events\n")
         for i in range(args.num_reads):
             for _ in range(MAX_REDRAWS):
@@ -187,6 +190,8 @@ def main() -> None:
             tr.write(f"{rid}\t{chrom}\t{start}\t{strand}\t{start + read_len}\t"
                      f"{n_subs}\t{n_ins}\t{n_del}\t{events}\n")
 
+    os.replace(truth_path + ".part", truth_path)
+    os.replace(args.reads_out + ".part", args.reads_out)
     print(f"[gen_long_reads] {args.num_reads} reads from {chrom} ({genome:,} bp), "
           f"len {args.min_len}-{args.max_len}, err={args.read_error}, "
           f"indel_frac={args.indel_frac}, seed={args.seed} -> {args.reads_out}", file=sys.stderr)

@@ -45,7 +45,7 @@
     },
     "download": {
       "tool": "curl",
-      "command": "curl -fsS https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR818/009/SRR8184499/SRR8184499_1.fastq.gz | gzip -dc | head -n 40000 > reads_1.fq"
+      "command": "curl -fsS https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR818/009/SRR8184499/SRR8184499_1.fastq.gz | gzip -dc | head -n 40000 > reads_1.fq.part && mv reads_1.fq.part reads_1.fq"
     }
   },
   "truth": {
